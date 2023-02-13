@@ -1,0 +1,7 @@
+frontend/cs261-project-tracker/.next/
+frontend/cs261-project-tracker/next-env.d.ts
+frontend/cs261-project-tracker/node_modules/
+frontend/cs261-project-tracker/yarn.lock
+frontend/cs261-project-tracker/.vscode
+frontend/cs261-project-tracker/.eslintrc.json
+backend/env/
