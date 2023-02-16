@@ -5,3 +5,39 @@ frontend/cs261-project-tracker/yarn.lock
 frontend/cs261-project-tracker/.vscode
 frontend/cs261-project-tracker/.eslintrc.json
 backend/env/
+
+
+# dependencies
+/frontend/cs261-project-tracker/node_modules
+/frontend/cs261-project-tracker/.pnp
+/frontend/cs261-project-tracker/.pnp.js
+
+# testing
+/frontend/cs261-project-tracker/coverage
+
+# next.js
+/frontend/cs261-project-tracker/.next/
+/frontend/cs261-project-tracker/out/
+
+# production
+/frontend/cs261-project-tracker/build
+
+# misc
+/frontend/cs261-project-tracker/.DS_Store
+/frontend/cs261-project-tracker/*.pem
+
+# debug
+/frontend/cs261-project-tracker/npm-debug.log*
+/frontend/cs261-project-tracker/yarn-debug.log*
+/frontend/cs261-project-tracker/yarn-error.log*
+/frontend/cs261-project-tracker/.pnpm-debug.log*
+
+# local env files
+/frontend/cs261-project-tracker/.env*.local
+
+# vercel
+/frontend/cs261-project-tracker/.vercel
+
+# typescript
+/frontend/cs261-project-tracker/*.tsbuildinfo
+/frontend/cs261-project-tracker/next-env.d.ts
