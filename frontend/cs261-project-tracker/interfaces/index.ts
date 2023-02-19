@@ -6,3 +6,8 @@ export type User = {
 	password: string;
 	yearsofexperience: number;
 }
+
+export type LoginInput = {
+	email: string;
+	password: string;
+}

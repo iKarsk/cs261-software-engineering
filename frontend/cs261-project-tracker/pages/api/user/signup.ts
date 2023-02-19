@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 	switch (req.method) {
 		case 'POST':
-			const { forename, surname, emial, password, yearsofexperience } = 
+			const { forename, surname, email, password, yearsofexperience } = 
 				req.body as User;
 
 			try {
@@ -18,15 +18,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 					res.status(400).send("Email in use already");
 				}
 
-				const hashedPassword = await bcrypt.hash(password, 5);
+				const hashedPassword = await bcrypt.hash(password, 5); // Hash password before storing
 
 				const user = await prisma.user.create({
 					data: {
-						forename,
-						surname,
-						email,
+						forename: forename,
+						surename: surname,
+						email: email,
 						password: hashedPassword,
-						yearsofexperience,
+						yearsofexperience: yearsofexperience,
 					},
 				});
 
@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 			break;
 		default:
-			res.status(405).end(`Method ${method} Not Allowed`);
+			res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
 
