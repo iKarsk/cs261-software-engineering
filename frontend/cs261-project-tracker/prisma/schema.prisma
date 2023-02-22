@@ -7,27 +7,83 @@ datasource db {
   url      = "file:../../../database/test.db"
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model project_tasks {
-  id          Int   @id
-  project     BigInt?
-  name        String?
+  id          BigInt       @id
+  project     BigInt
+  name        String
   description String?
   start_date  DateTime?
   deadline    DateTime?
   end_date    DateTime?
   progress    String?
   risk        Int?
-
+  projects    projects     @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_tasks  user_tasks[]
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model users {
-  id               Int @id @default(autoincrement())
-  forename         String
-  surname          String
-  email            String @unique
-  password         String
-  years_experience Int?
+  id                 BigInt               @id
+  forename           String
+  surname            String
+  email              String
+  password           String
+  years_experience   Int?
+  morale             morale[]
+  project_developers project_developers[]
+  user_invites       user_invites[]
+  user_tasks         user_tasks[]
+}
 
+model morale {
+  project     BigInt
+  u_id        BigInt
+  submit_date DateTime
+  morale      Int
+  users       users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects    projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([project, u_id, submit_date, morale])
+}
+
+model project_developers {
+  project   BigInt
+  u_id      BigInt
+  isManager Boolean
+  users     users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects  projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([project, u_id])
+}
+
+model projects {
+  id                 BigInt               @id
+  name               String
+  start_date         DateTime
+  deadline           DateTime?
+  end_date           DateTime?
+  budget             BigInt?
+  risk               Int?
+  repository_link    String?
+  morale             morale[]
+  project_developers project_developers[]
+  project_tasks      project_tasks[]
+  user_invites       user_invites[]
+}
+
+model user_invites {
+  project  BigInt
+  u_id     BigInt
+  users    users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([project, u_id])
+}
+
+model user_tasks {
+  task          BigInt
+  u_id          BigInt
+  users         users         @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  project_tasks project_tasks @relation(fields: [task], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([task, u_id])
 }

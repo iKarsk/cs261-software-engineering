@@ -7,7 +7,7 @@ CREATE TABLE projects(
     end_date timestamp,
     budget bigint,
     risk int,
-    repository_link varchar(MAX)
+    repository_link varchar(255)
 );
 
 
@@ -23,31 +23,34 @@ CREATE TABLE users(
 
 DROP TABLE morale CASCADE;
 CREATE TABLE morale(
-    project bigint PRIMARY KEY references projects (id),
-    user bigint PRIMARY KEY references users (id),
-    date timestamp PRIMARY KEY,
-    morale int
+    project bigint references projects (id),
+    u_id bigint references users (id),
+    submit_date timestamp,
+    morale int,
+    PRIMARY KEY (project, u_id, submit_date, morale)
 );
 
 DROP TABLE user_invites CASCADE;
 CREATE TABLE user_invites(
-    project bigint PRIMARY KEY references projects (id),
-    user bigint PRIMARY KEY references users (id)
+    project bigint references projects (id),
+    u_id bigint references users (id),
+    PRIMARY KEY (project, u_id)
 );
 
 
 DROP TABLE user_tasks CASCADE;
 CREATE TABLE user_tasks(
-    task bigint PRIMARY KEY references project_tasks (id),
-    user bigint PRIMARY KEY references users (id),
-
+    task bigint references project_tasks (id),
+    u_id bigint references users (id),
+    PRIMARY KEY (task, u_id)
 );
 
 DROP TABLE project_developers CASCADE;
 CREATE TABLE project_developers(
-    project bigint PRIMARY KEY references projects (id),
-    user bigint PRIMARY KEY references users (id),
-    isManager boolean 
+    project bigint references projects (id),
+    u_id bigint references users (id),
+    isManager boolean,
+    PRIMARY KEY (project, u_id)
 );
 
 DROP TABLE project_tasks CASCADE;
