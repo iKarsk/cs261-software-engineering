@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { User } from '../../../interfaces';
 import bcrypt from 'bcrypt';
-import prisma from '@prisma/client';
+import { prisma } from '../../db';
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
@@ -13,20 +13,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
 			try {
 				// Check whether email already in use
-				const existingUser = await prisma.user.findUnique({ where: { email } });
+				const existingUser = await prisma.users.findUnique({ where: { email } });
 				if (existingUser) {
 					res.status(400).send("Email in use already");
 				}
 
 				const hashedPassword = await bcrypt.hash(password, 5); // Hash password before storing
 
-				const user = await prisma.user.create({
+				const user = await prisma.users.create({
 					data: {
 						forename: forename,
-						surename: surname,
+						surname: surname,
 						email: email,
 						password: hashedPassword,
-						yearsofexperience: yearsofexperience,
+						years_experience: yearsofexperience,
 					},
 				});
 

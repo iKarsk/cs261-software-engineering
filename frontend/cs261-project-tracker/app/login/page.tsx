@@ -16,8 +16,8 @@ export default function Home() {
 
         const JSONdata = JSON.stringify(data);
 
-        const endpoint="/api/login";
-/*
+        const endpoint="/api/user/login";
+
         const options = {
             method: 'POST',
 
@@ -30,7 +30,7 @@ export default function Home() {
         const response = await fetch(endpoint, options);
 
         const result = await response.json();
-*/
+	console.log(result);
     }
 
 

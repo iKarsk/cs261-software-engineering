@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcrypt';
-import prisma from '@prisma/client';
+import { prisma } from '../../db';
 import { LoginInput, User } from '../../../interface';
 
 
@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 			const { email, password } = req.body as LoginInput;
 
 			try {
-				const user = await prisma.user.findUnique({ where: { email } });
+				const user = await prisma.users.findUnique({ where: { email: email } });
 
 				if (!user) {
 					return res.status(401).send("User not found");
