@@ -4,7 +4,7 @@ import { prisma } from '../../../lib/db';
 import { LoginInput, User } from '../../../interfaces/index';
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
 	switch (req.method) {
 		case 'POST':
