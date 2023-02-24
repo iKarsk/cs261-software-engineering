@@ -23,7 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 					return res.status(401).send("Wrong credentials. Try again.");
 				}
 
-				res.status(200).json(user);
+				const userObj = {
+					id: user.id,
+					email: user.email,
+					name: user.forename + " " + user.surname,
+				}
+
+				res.status(200).json(userObj);
 			} catch (error) {
 				
 				console.error(error);
