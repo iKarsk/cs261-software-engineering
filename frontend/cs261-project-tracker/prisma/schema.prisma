@@ -4,43 +4,16 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "file:../../../database/test.db"
-}
-
-model project_tasks {
-  id          BigInt       @id
-  project     BigInt
-  name        String
-  description String?
-  start_date  DateTime?
-  deadline    DateTime?
-  end_date    DateTime?
-  progress    String?
-  risk        Int?
-  projects    projects     @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user_tasks  user_tasks[]
-}
-
-model users {
-  id                 BigInt               @id
-  forename           String
-  surname            String
-  email              String
-  password           String
-  years_experience   Int?
-  morale             morale[]
-  project_developers project_developers[]
-  user_invites       user_invites[]
-  user_tasks         user_tasks[]
+  url      = env("DATABASE_URL")
 }
 
 model morale {
   project     BigInt
   u_id        BigInt
-  submit_date DateTime
+  submit_date DateTime @db.Timestamp(6)
   morale      Int
-  users       users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   projects    projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users       users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([project, u_id, submit_date, morale])
 }
@@ -48,22 +21,35 @@ model morale {
 model project_developers {
   project   BigInt
   u_id      BigInt
-  isManager Boolean
-  users     users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ismanager Boolean?
   projects  projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([project, u_id])
 }
 
+model project_tasks {
+  id          BigInt    @id
+  project     BigInt?
+  name        String?   @db.VarChar(100)
+  description String?   @db.VarChar(1000)
+  start_date  DateTime? @db.Timestamp(6)
+  deadline    DateTime? @db.Timestamp(6)
+  end_date    DateTime? @db.Timestamp(6)
+  progress    String?   @db.VarChar(100)
+  risk        Int?
+  projects    projects? @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
 model projects {
   id                 BigInt               @id
-  name               String
-  start_date         DateTime
-  deadline           DateTime?
-  end_date           DateTime?
+  name               String?              @db.VarChar(100)
+  start_date         DateTime?            @db.Timestamp(6)
+  deadline           DateTime?            @db.Timestamp(6)
+  end_date           DateTime?            @db.Timestamp(6)
   budget             BigInt?
   risk               Int?
-  repository_link    String?
+  repository_link    String?              @db.VarChar(500)
   morale             morale[]
   project_developers project_developers[]
   project_tasks      project_tasks[]
@@ -73,17 +59,20 @@ model projects {
 model user_invites {
   project  BigInt
   u_id     BigInt
-  users    users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   projects projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users    users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([project, u_id])
 }
 
-model user_tasks {
-  task          BigInt
-  u_id          BigInt
-  users         users         @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  project_tasks project_tasks @relation(fields: [task], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@id([task, u_id])
+model users {
+  id                 BigInt               @id
+  forename           String?              @db.VarChar(100)
+  surname            String?              @db.VarChar(100)
+  email              String?              @db.VarChar(100)
+  password           String?              @db.VarChar(100)
+  years_experience   Int?
+  morale             morale[]
+  project_developers project_developers[]
+  user_invites       user_invites[]
 }
