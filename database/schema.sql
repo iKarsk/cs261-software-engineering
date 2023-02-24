@@ -7,7 +7,7 @@ CREATE TABLE projects(
     end_date timestamp,
     budget bigint,
     risk int,
-    repository_link varchar(255)
+    repository_link varchar()
 );
 
 
