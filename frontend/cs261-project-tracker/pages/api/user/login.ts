@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcrypt';
-import { prisma } from '../../db';
+import { prisma } from '../../../lib/db';
 import { LoginInput, User } from '../../../interface';
 
 

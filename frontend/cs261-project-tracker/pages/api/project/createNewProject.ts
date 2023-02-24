@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { Project } from '../../../interfaces';
-import { prisma } from '../../db';
+import { prisma } from '../../../lib/db';
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
