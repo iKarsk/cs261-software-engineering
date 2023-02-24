@@ -14,13 +14,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 				const user = await prisma.users.findUnique({ where: { email: email } });
 
 				if (!user) {
-					return res.status(401).send("User not found");
+					return res.status(401).send("Wrong credentials. Try again.");
 				}
 
 				const passwordMatch = await bcrypt.compare(password, user.password);
 
 				if (!passwordMatch) {
-					return res.status(401).send("Incorrect password");
+					return res.status(401).send("Wrong credentials. Try again.");
 				}
 
 				res.status(200).json(user);
