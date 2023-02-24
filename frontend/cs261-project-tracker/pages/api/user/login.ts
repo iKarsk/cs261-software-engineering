@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcrypt';
 import { prisma } from '../../../lib/db';
-import { LoginInput, User } from '../../../interfaces/index';
+import type { LoginInput, User } from '../../../interfaces';
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
