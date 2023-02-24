@@ -10,7 +10,8 @@ export const authOptions: NextAuthOptions = {
                 password: {  label: "Password", type: "password" }
             },
             authorize: async (credentials, req) => {
-                const user = await fetch('http://localhost:3000/api/auth/login',
+                const user = await fetch(
+                    `${process.env.NEXTAUTH_URL}/api/user/login`,
                 {
                     method: 'POST',
                     headers: {
@@ -27,7 +28,9 @@ export const authOptions: NextAuthOptions = {
                 }
             }
         })
-    ]
+    ],
+    secret: process.env.JWT_SECRET,
+    session: { strategy: 'jwt' },
 }; 
 
 export default NextAuth(authOptions);

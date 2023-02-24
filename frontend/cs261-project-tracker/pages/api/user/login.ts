@@ -11,7 +11,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 			const { email, password } = req.body as LoginInput;
 
 			try {
-				const user = await prisma.users.findUnique({ where: { email: email } });
+				const user = await prisma.users.findUnique({
+					where: {
+						email: email
+					} 
+				});
 
 				if (!user) {
 					return res.status(401).send("Wrong credentials. Try again.");
