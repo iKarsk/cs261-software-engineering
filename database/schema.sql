@@ -1,4 +1,4 @@
-DROP TABLE project CASCADE;
+DROP TABLE IF EXISTS project CASCADE;
 CREATE TABLE projects(
     id bigint PRIMARY KEY,
     name varchar(100),
@@ -11,7 +11,7 @@ CREATE TABLE projects(
 );
 
 
-DROP TABLE users CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users(
     id bigint PRIMARY KEY,
     forename varchar(100),
@@ -21,7 +21,7 @@ CREATE TABLE users(
     years_experience int
 );
 
-DROP TABLE morale CASCADE;
+DROP TABLE IF EXISTS morale CASCADE;
 CREATE TABLE morale(
     project bigint references projects (id),
     u_id bigint references users (id),
@@ -30,7 +30,7 @@ CREATE TABLE morale(
     PRIMARY KEY (project, u_id, submit_date, morale)
 );
 
-DROP TABLE user_invites CASCADE;
+DROP TABLE IF EXISTS user_invites CASCADE;
 CREATE TABLE user_invites(
     project bigint references projects (id),
     u_id bigint references users (id),
@@ -38,14 +38,14 @@ CREATE TABLE user_invites(
 );
 
 
-DROP TABLE user_tasks CASCADE;
+DROP TABLE IF EXISTS user_tasks CASCADE;
 CREATE TABLE user_tasks(
     task bigint references project_tasks (id),
     u_id bigint references users (id),
     PRIMARY KEY (task, u_id)
 );
 
-DROP TABLE project_developers CASCADE;
+DROP TABLE IF EXISTS project_developers CASCADE;
 CREATE TABLE project_developers(
     project bigint references projects (id),
     u_id bigint references users (id),
@@ -53,7 +53,7 @@ CREATE TABLE project_developers(
     PRIMARY KEY (project, u_id)
 );
 
-DROP TABLE project_tasks CASCADE;
+DROP TABLE IF EXISTS project_tasks CASCADE;
 CREATE TABLE project_tasks(
     id bigint PRIMARY KEY,
     project bigint references projects (id),
