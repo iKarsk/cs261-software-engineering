@@ -9,8 +9,22 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "email", placeholder: "test@test.com" },
                 password: {  label: "Password", type: "password" }
             },
-            async authorize(credentials, req){
-                
+            authorize: async (credentials, req) => {
+                const user = await fetch('http://localhost:3000/api/auth/login',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(credentials),
+                }).then((res) => res.json()).catch((err) => { return null; });
+
+                if(user){
+                    return user;
+                }
+                else{
+                    return null;
+                }
             }
         })
     ]
