@@ -34,3 +34,26 @@ export type Task = {
 	progress: string;
 	risk: number;
 }
+
+export type UserTask = {
+	task: number;
+	u_id: number;
+}
+
+export type Developer = {
+	project: number;
+	u_id: number;
+	ismanager: boolean;
+}
+
+export type Invite = {
+	project: number;
+	u_id: number;
+}
+
+export type Morale = {
+	project: number;
+	u_id: number;
+	submit_date: Date;
+	morale: number;
+}
