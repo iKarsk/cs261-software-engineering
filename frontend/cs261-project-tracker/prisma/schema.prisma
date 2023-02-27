@@ -8,8 +8,8 @@ datasource db {
 }
 
 model morale {
-  project     BigInt
-  u_id        BigInt
+  project     Int
+  u_id        Int
   submit_date DateTime @default(now()) @db.Timestamp(6)
   morale      Int
   projects    projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -19,8 +19,8 @@ model morale {
 }
 
 model project_developers {
-  project   BigInt
-  u_id      BigInt
+  project   Int
+  u_id      Int
   ismanager Boolean
   projects  projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users     users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -29,8 +29,8 @@ model project_developers {
 }
 
 model project_tasks {
-  id          BigInt       @id @default(autoincrement())
-  project     BigInt
+  id          Int       @id @default(autoincrement())
+  project     Int
   name        String       @db.VarChar(100)
   description String       @db.VarChar(1000)
   start_date  DateTime     @db.Timestamp(6)
@@ -43,12 +43,12 @@ model project_tasks {
 }
 
 model projects {
-  id                 BigInt               @id @default(autoincrement())
+  id                 Int               @id @default(autoincrement())
   name               String               @db.VarChar(100)
   start_date         DateTime             @db.Timestamp(6)
   deadline           DateTime             @db.Timestamp(6)
   end_date           DateTime             @db.Timestamp(6)
-  budget             BigInt
+  budget             Int
   risk               Int
   repository_link    String               @db.VarChar(500)
   morale             morale[]
@@ -58,8 +58,8 @@ model projects {
 }
 
 model user_invites {
-  project  BigInt
-  u_id     BigInt
+  project  Int
+  u_id     Int
   projects projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users    users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -67,7 +67,7 @@ model user_invites {
 }
 
 model users {
-  id                 BigInt               @id @default(autoincrement())
+  id                 Int               @id @default(autoincrement())
   forename           String               @db.VarChar(100)
   surname            String               @db.VarChar(100)
   email              String               @unique @db.VarChar(100)
@@ -80,8 +80,8 @@ model users {
 }
 
 model user_tasks {
-  task          BigInt
-  u_id          BigInt
+  task          Int
+  u_id          Int
   users         users         @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   project_tasks project_tasks @relation(fields: [task], references: [id], onDelete: NoAction, onUpdate: NoAction)
 

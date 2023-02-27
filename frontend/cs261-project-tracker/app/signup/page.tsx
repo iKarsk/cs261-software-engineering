@@ -34,8 +34,8 @@ export default function Home() {
 
         const response = await fetch(endpoint, options);
 
-        //const result = await response.json();
-	    //console.log(result);
+        const result = await response.json();
+	    console.log(result);
     }
 
 
