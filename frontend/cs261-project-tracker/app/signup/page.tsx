@@ -2,9 +2,12 @@
 
 import styles from './page.module.css'
 import Link from 'next/link';
-
+import { signIn, useSession } from "next-auth/react"
+import { redirect } from 'next/navigation';
+import { useEffect } from "react";
 
 export default function Home() {
+    const {status, data} = useSession();
 
     const handleSubmit = async (event : any) => {
         event.preventDefault();
@@ -30,41 +33,50 @@ export default function Home() {
             body: JSONdata,
         };
 
-        console.log("You are here");
 
         const response = await fetch(endpoint, options);
 
-        const result = await response.json();
-	    console.log(result);
+        if (response.status === 200) {
+            const res = await signIn('credentials', {
+                email: event.target.email.value,
+                password: event.target.password.value,
+                redirect: false,
+                callbackUrl: "/dashboard"
+            });
+        }
     }
 
+    useEffect(() => {
+        if (status === "authenticated") redirect("/dashboard");
+    }, [status]);
 
 
+    if (status === "loading") return <div>Loading...</div>;
 
 
-  return (
-    <div className={styles.container}>  
-        <form onSubmit = {handleSubmit}>
-            <div id={styles.formBox}>
-                <label htmlFor="forename">Forename</label>
-                <input className={styles.input} type="text" id="forename" name="forename" required/>
+    return (
+        <div className={styles.container}>  
+            <form onSubmit = {handleSubmit}>
+                <div id={styles.formBox}>
+                    <label htmlFor="forename">Forename</label>
+                    <input className={styles.input} type="text" id="forename" name="forename" required/>
 
-                <label htmlFor="surname">Surname</label>
-                <input className={styles.input} type="text" id="surname" name="surname" required/>
+                    <label htmlFor="surname">Surname</label>
+                    <input className={styles.input} type="text" id="surname" name="surname" required/>
 
-                <label htmlFor="experience">Years of Experience</label>
-                <input className={styles.input} type="number" id="experience" name="experience" required/>
+                    <label htmlFor="experience">Years of Experience</label>
+                    <input className={styles.input} type="number" id="experience" name="experience" required/>
 
-                <label htmlFor="email">Email</label>
-                <input className={styles.input} type="email" id="email" name="email" required/>
+                    <label htmlFor="email">Email</label>
+                    <input className={styles.input} type="email" id="email" name="email" required/>
 
-                <label htmlFor="password">Password</label>
-                <input className={styles.input} type="password" id="password" name="password" required/>
+                    <label htmlFor="password">Password</label>
+                    <input className={styles.input} type="password" id="password" name="password" required/>
 
-                <button type="submit">Submit</button>
-            </div>
-        </form>
-        
-    </div>
-  )
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+            
+        </div>
+    )
 }

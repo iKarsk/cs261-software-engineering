@@ -17,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				// Check whether email already in use
 				const existingUser = await prisma.users.findUnique({ where: { email } });
 				if (existingUser) {
-					res.status(400).send("Email in use already");
+					return res.status(400).send("Email in use already");
 				}
 
 				const hashedPassword = await bcrypt.hash(password, 5); // Hash password before storing
@@ -32,7 +32,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					},
 				});
 
-				res.status(201).json(user);
+				const userObj = {
+					id: user.id,
+					name: user.forename + " " + user.surname,
+					email: user.email,
+				}
+
+				res.status(201).json(userObj);
 			} catch (error) {
 				console.error(error);
 				res.status(500).send("Internal server error");
