@@ -3,7 +3,7 @@ import type { Invite } from '../../../interfaces';
 import { prisma } from '../../../lib/db';
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
 	switch (req.method) {
 		case 'POST':
@@ -11,6 +11,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 				req.body as Invite;
 
 			try {
+				// Check if invitation already exists
+				const existingInvitation = await prisma.user_invites.findUnique({
+				  where: { project_u_id: { project: p_id, u_id } },
+				});
+
+				if (existingInvitation) {
+				  res.status(409).send('User is already invited to this project');
+				}
+				
+				// Create new invitation
 				const invitation = await prisma.user_invites.create({
 					data: {
 						project: p_id,

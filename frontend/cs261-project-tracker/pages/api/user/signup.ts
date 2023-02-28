@@ -8,16 +8,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-
 			const { forename, surname, email, password, yearsofexperience } = 
-				req.body as User;
-			
+				req.body as User;	
 
 			try {
 				// Check whether email already in use
 				const existingUser = await prisma.users.findUnique({ where: { email } });
 				if (existingUser) {
-					return res.status(400).send("Email in use already");
+					return res.status(409).send("Email in use already");
 				}
 
 				const hashedPassword = await bcrypt.hash(password, 5); // Hash password before storing

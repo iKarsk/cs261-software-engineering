@@ -3,7 +3,7 @@ import type { Task } from '../../../interfaces';
 import { prisma } from '../../../lib/db';
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<User>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
 	switch (req.method) {
 		case 'POST':
