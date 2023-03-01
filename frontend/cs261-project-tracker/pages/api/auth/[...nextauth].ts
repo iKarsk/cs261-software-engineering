@@ -1,6 +1,7 @@
 import NextAuth, {NextAuthOptions} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+// export const authOptions: NextAuthOptions = {
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
@@ -33,6 +34,19 @@ export const authOptions: NextAuthOptions = {
     },
     secret: process.env.JWT_SECRET,
     session: { strategy: 'jwt' },
+    callbacks: {
+        async jwt({token, user}){
+            if(user){
+                token.id = user.id;
+            }
+            return token;
+        },
+        async session({session, token, user}){
+            session.user.id = token.id;
+
+            return session;
+        }
+    }
 }; 
 
 export default NextAuth(authOptions);
