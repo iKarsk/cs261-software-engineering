@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signIn, useSession } from "next-auth/react"
 import { redirect } from 'next/navigation';
 import { useEffect } from "react";
+import Router from 'next/router'
 
 export default function Home() {
     const {status, data} = useSession();
@@ -39,6 +40,10 @@ export default function Home() {
                     <button type="submit">Submit</button>
                 </div>
             </form>
+            <div id={styles.formBox}>
+                <hr className={styles.solid}/>
+                <Link href="/signup"><button type="button">Sign up</button></Link>
+            </div>
             
         </div>
     )

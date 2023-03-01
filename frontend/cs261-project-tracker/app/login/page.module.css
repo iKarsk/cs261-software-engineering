@@ -27,3 +27,9 @@
   margin-bottom: 30px;
   width: 50%;
 }
+
+.solid{
+  border-top: 1px solid #bbb;
+  width: 80%;
+  margin-bottom: 30px;
+}

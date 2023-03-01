@@ -35,8 +35,9 @@ export default function Home() {
 
 
         const response = await fetch(endpoint, options);
+        console.log(response);
 
-        if (response.status === 200) {
+        if (response.status === 200 || response.status === 201) {
             const res = await signIn('credentials', {
                 email: event.target.email.value,
                 password: event.target.password.value,
