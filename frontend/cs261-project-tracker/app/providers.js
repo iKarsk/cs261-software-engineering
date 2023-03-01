@@ -1,7 +1,7 @@
+'use client';
+
 import { CacheProvider } from '@chakra-ui/next-js'
 import { ChakraProvider } from '@chakra-ui/react'
-
-"use client";
 
  import { SessionProvider } from "next-auth/react";
 
