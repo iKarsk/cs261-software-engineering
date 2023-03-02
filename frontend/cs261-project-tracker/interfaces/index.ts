@@ -54,3 +54,9 @@ export type Morale = {
 	submit_date: Date;
 	morale: number;
 }
+
+export type HandleInvite = {
+	project: number;
+	u_id: number;
+	accept: boolean:
+}
