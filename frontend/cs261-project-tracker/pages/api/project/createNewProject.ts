@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { name, start, deadline, end, budget, risk, respository } = 
+			const { name, start, deadline, end, budget, risk, repository } = 
 				req.body as Project;
 
 			try {
