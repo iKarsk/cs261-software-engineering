@@ -3,7 +3,7 @@ import { prisma } from '../../../lib/db';
 import type { Project } from '../../../interfaces';
 
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<Project[]>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
 	switch (req.method) {
 		case 'POST':
