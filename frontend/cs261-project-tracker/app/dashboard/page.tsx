@@ -25,7 +25,6 @@ import {
     InputGroup,
     InputLeftElement
   } from '@chakra-ui/react'
-
 export default function Dashboard() {
     const {status, data} = useSession();
     const { isOpen: isInviteOpen, onOpen: onInviteOpen, onClose: onInviteClose } = useDisclosure();
@@ -38,6 +37,10 @@ export default function Dashboard() {
     const [projectsLoading, setProjectsLoading] = useState(false);
 
     const [newProject, setNewProject] = useState({});
+    const [projectName, setProjectName] = useState("");
+    const [deadline, setDeadline] = useState("");
+    const [budget, setBudget] = useState("");
+    const [repository, setRepository] = useState("");
 
     useEffect(() => {
         if (status === "unauthenticated") redirect("/login");
@@ -96,6 +99,41 @@ export default function Dashboard() {
 
         setLoading(false);        
 
+    }
+
+
+
+    const handleNewProject = async () => {
+        setLoading(true);
+	onProjectClose();
+
+        const postData = {
+		u_id: data?.user.id,
+		name: projectName,
+		deadline: new Date(deadline),
+		budget: Number(budget),
+		repository_link: repository
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/createNewProject";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+        const responseJSON = await response.json();
+
+        setNewProject(responseJSON);
+
+        setLoading(false);
     }
 
     if (status === "authenticated"){
@@ -164,15 +202,17 @@ export default function Dashboard() {
                     <ModalContent>
                         <ModalHeader>Create a new project</ModalHeader>
                         <ModalCloseButton />
+
+			<form id="newProjectForm" onSubmit={handleNewProject}>
                         <ModalBody pb={6}>
                             <FormControl mt={4}>
                                 <FormLabel>Project Name</FormLabel>
-                                <Input placeholder="Project Name"/>
+                                <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
                             </FormControl>
 
                             <FormControl mt={4}>
                                 <FormLabel>Deadline</FormLabel>
-                                <Input placeholder="Select date" type="date"/>
+                                <Input placeholder="Select date" type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
                             </FormControl>
 
                             <FormControl mt={4}>
@@ -185,7 +225,7 @@ export default function Dashboard() {
                                     fontSize='1.2em'
                                     children='£'
                                     />
-                                    <Input type="number" placeholder='Enter amount' />
+                                    <Input type="number" placeholder='Enter amount' onChange={event => setBudget(event.currentTarget.value)}/>
 
                                 </InputGroup>
                                 
@@ -193,17 +233,17 @@ export default function Dashboard() {
 
                             <FormControl mt={4}>
                                 <FormLabel>Repository Link</FormLabel>
-                                <Input placeholder="https://"/>
+                                <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
                             </FormControl>
-
 
                         </ModalBody>
                         <ModalFooter>
-                            <Button colorScheme='blue' mr={3}>
+                            <Button colorScheme='blue' mr={3} type="submit">
                                 Save
                             </Button>
                             <Button onClick={onProjectClose}>Cancel</Button>
                         </ModalFooter>
+			    </form>
                     </ModalContent>
                 </Modal>
 

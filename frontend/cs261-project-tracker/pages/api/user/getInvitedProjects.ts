@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../../lib/db';
-import type { Project } from '../../../interfaces';
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -11,17 +10,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 			try {
 				// Get user invites given user id
-				const invitations = await prisma.user_invites.findMany({
+				const invitationsArr = await prisma.user_invites.findMany({
 					where: {
 						u_id: Number(userid)
 					} 
 				});
 
+				let invitationIds = invitationsArr.map(a => a.project); // Extract invitation IDs
 
 				// Get all projects user is invited to
 				const projects = await prisma.projects.findMany({
 					where: {
-						id: { in: invitations.map(Number) }
+						id: { in: invitationIds.map(Number) }
 					}
 				});
 

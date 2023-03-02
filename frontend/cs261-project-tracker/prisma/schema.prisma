@@ -38,16 +38,16 @@ model project_tasks {
   end_date    DateTime     @db.Timestamp(6)
   progress    String       @db.VarChar(100)
   risk        Int
-  projects    projects?    @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects    projects    @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user_tasks  user_tasks[]
 }
 
 model projects {
-  id                 Int               @id @default(autoincrement())
+  id                 Int                  @id @default(autoincrement())
   name               String               @db.VarChar(100)
-  start_date         DateTime             @db.Timestamp(6)
-  deadline           DateTime             @db.Timestamp(6)
-  end_date           DateTime             @db.Timestamp(6)
+  start_date         DateTime             @db.Date
+  deadline           DateTime             @db.Date
+  end_date           DateTime?            @db.Date
   budget             Int
   risk               Int
   repository_link    String               @db.VarChar(500)

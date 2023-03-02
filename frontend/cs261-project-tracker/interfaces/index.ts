@@ -12,14 +12,11 @@ export type LoginInput = {
 	password: string;
 }
 
-export type Project = {
-	id: number;
+export type ProjectInput = {
+	u_id: number;
 	name: string;
-	start_date: Date;
 	deadline: Date;
-	end_date: Date;
 	budget: number;
-	risk: number;
 	repository_link: string;
 }
 
