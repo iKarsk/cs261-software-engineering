@@ -7,18 +7,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { p_id, name, desc, start, deadline, end, progress, risk } = 
+			const { project, name, description, start_date, deadline, end_date, progress, risk } = 
 				req.body as Task;
 
 			try {
 				const task = await prisma.project_tasks.create({
 					data: {
-						project: p_id,
+						project: project,
 						name: name,
-						description: desc,
-						start_date: start,
+						description: description,
+						start_date: start_date,
 						deadline: deadline,
-						end_date: end,
+						end_date: end_date,
 						progress: progress,
 						risk: risk,
 					},

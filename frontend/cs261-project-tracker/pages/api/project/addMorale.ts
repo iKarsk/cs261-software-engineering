@@ -7,21 +7,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { p_id, u_id, submit_date, morale_val } = 
+			const { project, u_id, submit_date, morale } = 
 				req.body as Morale;
 
 			try {
-				const morale = await prisma.morale.create({
+				const morale_obj = await prisma.morale.create({
 					data: {
-						project: p_id,
+						project: project,
 						u_id: u_id,
 						submit_date: submit_date,
-						morale: morale_val,
+						morale: morale,
 					},
 
 				});
 
-				res.status(201).json(morale);
+				res.status(201).json(morale_obj);
 			} catch (error) {
 				console.error(error);
 				res.status(500).send("Internal server error");

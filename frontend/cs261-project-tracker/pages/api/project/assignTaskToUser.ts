@@ -6,13 +6,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     switch (req.method) {
         case 'POST':
-            const { t_id, u_id, is_manager } = req.body as UserTask;
+            const { task, u_id } = req.body as UserTask;
 
             try {
                 // Check if user is already assigned to the task
                 const existingUserTask = await prisma.user_tasks.findFirst({
                     where: {
-                        task: t_id,
+                        task: task,
                         u_id: u_id,
                     },
                 });
@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 // Assign task to user
                 const newUserTask = await prisma.user_tasks.create({
                     data: {
-                        task: t_id,
+                        task: task,
                         u_id: u_id,
                     },
                 });

@@ -7,13 +7,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { p_id, u_id } = 
+			const { project, u_id } = 
 				req.body as Invite;
 
 			try {
 				// Check if invitation already exists
 				const existingInvitation = await prisma.user_invites.findUnique({
-				  where: { project_u_id: { project: p_id, u_id } },
+				  where: { project_u_id: { project: project, u_id } },
 				});
 
 				if (existingInvitation) {
@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				// Create new invitation
 				const invitation = await prisma.user_invites.create({
 					data: {
-						project: p_id,
+						project: project,
 						u_id: u_id,
 					},
 

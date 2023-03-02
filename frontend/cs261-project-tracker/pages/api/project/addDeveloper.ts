@@ -7,14 +7,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { p_id, u_id, is_manager } = req.body as Developer;
+			const { project, u_id, ismanager } = req.body as Developer;
 
 			try {
 				// Check if user is already a developer for the project
 				const existingDeveloper = await prisma.project_developers.findUnique({
 				  where: {
 				    project_u_id: {
-				      project: p_id,
+				      project: project,
 				      u_id: u_id
 				    }
 				  }
@@ -22,16 +22,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 				if (existingDeveloper) {
 				  res.status(409).json({
-				    error: `Project developer with p_id ${p_id} and u_id ${u_id} already exists`
+				    error: `Project developer with p_id ${project} and u_id ${u_id} already exists`
 				  });
 				}
 
 				// Add user to project as developer 
 				const developer = await prisma.project_developers.create({
 					data: {
-						project: p_id,
+						project: project,
 						u_id: u_id,
-						ismanager: is_manager,
+						ismanager: ismanager,
 					},
 
 				});
