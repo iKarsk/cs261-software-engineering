@@ -25,6 +25,15 @@ import {
     InputGroup,
     InputLeftElement
   } from '@chakra-ui/react'
+
+import {
+  List,
+  ListItem,
+  ListIcon,
+  OrderedList,
+  UnorderedList,
+} from '@chakra-ui/react'
+
 export default function Dashboard() {
     const {status, data} = useSession();
     const { isOpen: isInviteOpen, onOpen: onInviteOpen, onClose: onInviteClose } = useDisclosure();
@@ -33,7 +42,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(false);
     const [invites, setInvites] = useState([]);
     
-    const [projects, setProjects] = useState([]);
+    const [projects, setProjects] = useState<any[]>([]);
     const [projectsLoading, setProjectsLoading] = useState(false);
 
     const [newProject, setNewProject] = useState({});
@@ -167,8 +176,14 @@ export default function Dashboard() {
 
                 <Button onClick={onProjectOpen} mt={5}>Create new Project</Button>
 
-                <Box bg='tomato' w='20%' h='100px' mt={5} color='white' display='flex' justifyContent='center' alignItems='center'>
-                    {projectsLoading ? "Loading..." : projects.length ? "You have projects" : "You have no projects"}
+                <Box bg='tomato' w='20%' h='fit' mt={5} color='white' display='flex' justifyContent='center' alignItems='center'>
+                    {projectsLoading ? "Loading..." : projects.length == 0 ? "You have no projects" :
+			    <List spacing={3}>
+				    {projects.map((e, i) => (
+					    <ListItem key={i}>{e.name}</ListItem>
+				    ))}
+			    </List>
+		    }
                 </Box>
 
                 <Modal
@@ -243,7 +258,7 @@ export default function Dashboard() {
                             </Button>
                             <Button onClick={onProjectClose}>Cancel</Button>
                         </ModalFooter>
-			    </form>
+			</form>
                     </ModalContent>
                 </Modal>
 
