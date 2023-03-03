@@ -17,8 +17,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 						start_date: new Date(),
 						deadline: deadline,
 						budget: budget,
-						end_date: new Date(Date.now()), // Idk can't have null values for some reason...
-						risk: -1,
+						end_date: null,
+						risk: null,
 						repository_link: repository_link,
 					},
 
