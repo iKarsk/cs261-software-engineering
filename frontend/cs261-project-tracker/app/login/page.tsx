@@ -26,28 +26,33 @@ export default function Home() {
         if (status === "authenticated") redirect("/dashboard");
     }, [status]);
 
-    if (status === "loading") return <Loading />;
+    
 
-    return (
-        <div className={styles.container}>  
-            <form onSubmit = {handleSubmit}>
+    if (status === "unauthenticated") {
+        return (
+            <div className={styles.container}>  
+                <form onSubmit = {handleSubmit}>
+                    <div id={styles.formBox}>
+                        <label htmlFor="email">Email</label>
+                        <input className={styles.input} type="email" id="email" name="email" required/>
+    
+                        <label htmlFor="password">Password</label>
+                        <input className={styles.input} type="password" id="password" name="password" required/>
+    
+                        <button type="submit">Submit</button>
+                    </div>
+                </form>
                 <div id={styles.formBox}>
-                    <label htmlFor="email">Email</label>
-                    <input className={styles.input} type="email" id="email" name="email" required/>
-
-                    <label htmlFor="password">Password</label>
-                    <input className={styles.input} type="password" id="password" name="password" required/>
-
-                    <button type="submit">Submit</button>
+                    <hr className={styles.solid}/>
+                    <Link href="/signup"><button type="button">Sign up</button></Link>
                 </div>
-            </form>
-            <div id={styles.formBox}>
-                <hr className={styles.solid}/>
-                <Link href="/signup"><button type="button">Sign up</button></Link>
+                
             </div>
-            
-        </div>
-    )
+        )
+    }
+
+    return <Loading />;
+
 
   
 }

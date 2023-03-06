@@ -35,6 +35,7 @@ import {
   UnorderedList,
 } from '@chakra-ui/react'
 import Loading from "@/components/loading";
+import Link from "next/link";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -186,7 +187,7 @@ export default function Dashboard() {
                     {projectsLoading ? "Loading..." : projects.length == 0 ? "You have no projects" :
 			    <List spacing={3}>
 				    {projects.map((e, i) => (
-					    <ListItem key={i}>{e.name}</ListItem>
+					    <Link href={"/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id}><ListItem key={i}>{e.name}</ListItem></Link>
 				    ))}
 			    </List>
 		    }

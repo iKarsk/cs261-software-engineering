@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 
 export default function Page({
@@ -71,6 +71,10 @@ export default function Page({
                 <h2>{JSON.stringify(data.user, null, 2)}</h2>
 
                 <Divider />
+
+                <Heading as='h1' size='2xl'>{project.name}</Heading>
+
+                <Text>{project.start_date.substring(0, 10)}</Text>
 
 
 

@@ -53,32 +53,36 @@ export default function Home() {
     }, [status]);
 
 
-    if (status === "loading") return <Loading />;
+    
 
+    if (status === "unauthenticated"){
+        return (
+            <div className={styles.container}>  
+                <form onSubmit = {handleSubmit}>
+                    <div id={styles.formBox}>
+                        <label htmlFor="forename">Forename</label>
+                        <input className={styles.input} type="text" id="forename" name="forename" required/>
+    
+                        <label htmlFor="surname">Surname</label>
+                        <input className={styles.input} type="text" id="surname" name="surname" required/>
+    
+                        <label htmlFor="experience">Years of Experience</label>
+                        <input className={styles.input} type="number" id="experience" name="experience" required/>
+    
+                        <label htmlFor="email">Email</label>
+                        <input className={styles.input} type="email" id="email" name="email" required/>
+    
+                        <label htmlFor="password">Password</label>
+                        <input className={styles.input} type="password" id="password" name="password" required/>
+    
+                        <button type="submit">Submit</button>
+                    </div>
+                </form>
+                
+            </div>
+        )
+    }
 
-    return (
-        <div className={styles.container}>  
-            <form onSubmit = {handleSubmit}>
-                <div id={styles.formBox}>
-                    <label htmlFor="forename">Forename</label>
-                    <input className={styles.input} type="text" id="forename" name="forename" required/>
+    return <Loading />;
 
-                    <label htmlFor="surname">Surname</label>
-                    <input className={styles.input} type="text" id="surname" name="surname" required/>
-
-                    <label htmlFor="experience">Years of Experience</label>
-                    <input className={styles.input} type="number" id="experience" name="experience" required/>
-
-                    <label htmlFor="email">Email</label>
-                    <input className={styles.input} type="email" id="email" name="email" required/>
-
-                    <label htmlFor="password">Password</label>
-                    <input className={styles.input} type="password" id="password" name="password" required/>
-
-                    <button type="submit">Submit</button>
-                </div>
-            </form>
-            
-        </div>
-    )
 }
