@@ -4,15 +4,24 @@ import styles from './page.module.css'
 import Link from 'next/link';
 import { signIn, useSession } from "next-auth/react"
 import { redirect } from 'next/navigation';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Router from 'next/router'
 import Loading from '@/components/loading';
+import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, CircularProgress, InputGroup, InputRightElement } from '@chakra-ui/react';
+import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
+import ErrorMessage from '@/components/ErrorMessage';
 
 export default function Home() {
     const {status, data} = useSession();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+
+    const passwordVisibility = () => setShowPassword(!showPassword);
 
     const handleSubmit = async (event : any) => {
         event.preventDefault();
+        setLoading(true);
 
         const res = await signIn('credentials', {
             email: event.target.email.value,
@@ -20,6 +29,15 @@ export default function Home() {
             redirect: false,
             callbackUrl: "/dashboard"
         });
+
+        if (res?.error === "CredentialsSignin") {
+            setError("Invalid email or password");
+        } else{
+            setError("Internal server error. Please try again later.");
+        }
+
+        setLoading(false);
+        setShowPassword(false);
     }
 
     useEffect(() => {
@@ -30,6 +48,37 @@ export default function Home() {
 
     if (status === "unauthenticated") {
         return (
+            <Flex width="100vw" height="100vh" align="center" justifyContent="center">
+                <Box p={8} maxWidth="600px" borderWidth={1} borderRadius={8} boxShadow="lg">
+                    <Box textAlign="center">
+                        <Heading>Login</Heading>
+                    </Box>
+                    <Box my={4} textAlign="left">
+                        <form onSubmit = {handleSubmit}>
+                            {error && <ErrorMessage message={error} />}
+                            <FormControl isRequired>
+                                <FormLabel>Email</FormLabel>
+                                <Input type="email" placeholder="johndoe@email.com" id="email"/>
+                            </FormControl>
+                            <FormControl mt={6} isRequired>
+                                <FormLabel>Password</FormLabel>
+                                <InputGroup>
+                                    <Input type={showPassword ? 'text' : 'password'} placeholder="********" id="password" />
+                                    <InputRightElement width="3rem">
+                                        <Button h="1.5rem" size="sm" onClick={passwordVisibility}>
+                                            {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                                        </Button>
+                                    </InputRightElement>
+                                </InputGroup>
+                            </FormControl>
+                            <Button type="submit" colorScheme="teal" variant="outline" width="full" mt={4}>
+                                {loading ? (<CircularProgress isIndeterminate size="24px" color="teal" />) : ('Sign in')}
+                            </Button>
+                        </form>
+                    </Box>
+                </Box>
+            </Flex>
+            /*
             <div className={styles.container}>  
                 <form onSubmit = {handleSubmit}>
                     <div id={styles.formBox}>
@@ -48,6 +97,7 @@ export default function Home() {
                 </div>
                 
             </div>
+            */
         )
     }
 
