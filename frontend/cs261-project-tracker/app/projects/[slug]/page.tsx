@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
-
+import { useRouter } from "next/navigation";
+import styles from './page.module.css'
+import { Divider, Button, Box, useDisclosure } from '@chakra-ui/react'
 
 export default function Page({
     params,
@@ -13,8 +15,10 @@ export default function Page({
     searchParams?: { [key: string]: string | string[] | undefined };
   }) {
 
+    const router = useRouter();
     const {status, data} = useSession();
     const [project, setProject] = useState({});
+    const [loaded, setLoaded] = useState(false);
 
 
     useEffect(() => {
@@ -28,7 +32,7 @@ export default function Page({
             if(lastIndex === -1 || !isnum){
                 redirect("/dashboard");
             }else{
-                console.log(projectid);
+
 
                 const fetchData = async () => {
                     const endpoint = "/api/project/getProject";
@@ -46,23 +50,34 @@ export default function Page({
                     if(response.status === 200){
                         const json = await response.json();
                         setProject(json);
+                        setLoaded(true);
+                    }else{
+                        router.push("/dashboard");
                     }
                 };
 
                 fetchData().catch(console.error);
-
-                if(Object.keys(project).length === 0 && project.constructor === Object){
-                    redirect("/dashboard");
-                }
         
-
             }
         }
 
-    });
+    }, [status]);
 
+    if (status === "authenticated" && loaded){
     return(
-        <h1>My Page</h1>
+        <div className={styles.container}>
+                <h1>Welcome! You are signed in and can access this page.</h1>
+                <h2>{JSON.stringify(data.user, null, 2)}</h2>
+
+                <Divider />
+
+
+
+
+            </div>
     );
+    }
+
+    return <div>Loading...</div>
   }
   

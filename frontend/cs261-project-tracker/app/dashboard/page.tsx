@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import styles from './page.module.css'
 import { Divider, Button, Box, useDisclosure } from '@chakra-ui/react'
+import { useRouter } from "next/navigation";
 
 import {
     Modal,
@@ -35,6 +36,7 @@ import {
 } from '@chakra-ui/react'
 
 export default function Dashboard() {
+    const router = useRouter();
     const {status, data} = useSession();
     const { isOpen: isInviteOpen, onOpen: onInviteOpen, onClose: onInviteClose } = useDisclosure();
     const { isOpen: isProjectOpen, onOpen: onProjectOpen, onClose: onProjectClose } = useDisclosure();
@@ -114,7 +116,7 @@ export default function Dashboard() {
 
     const handleNewProject = async () => {
         setLoading(true);
-	onProjectClose();
+        
 
         const postData = {
 		u_id: data?.user.id,
@@ -140,9 +142,12 @@ export default function Dashboard() {
 
         const responseJSON = await response.json();
 
-        setNewProject(responseJSON);
+        if(response.status == 201){
+            router.push("/projects/" + responseJSON.name.replace(/\s+/g, '-').toLowerCase() + "-" + responseJSON.id); 
+        }
 
         setLoading(false);
+        onProjectClose();
     }
 
     if (status === "authenticated"){
@@ -218,7 +223,7 @@ export default function Dashboard() {
                         <ModalHeader>Create a new project</ModalHeader>
                         <ModalCloseButton />
 
-			<form id="newProjectForm" onSubmit={handleNewProject}>
+
                         <ModalBody pb={6}>
                             <FormControl mt={4}>
                                 <FormLabel>Project Name</FormLabel>
@@ -253,12 +258,12 @@ export default function Dashboard() {
 
                         </ModalBody>
                         <ModalFooter>
-                            <Button colorScheme='blue' mr={3} type="submit">
+                            <Button colorScheme='blue' mr={3} type="submit" onClick={handleNewProject}>
                                 Save
                             </Button>
                             <Button onClick={onProjectClose}>Cancel</Button>
                         </ModalFooter>
-			</form>
+
                     </ModalContent>
                 </Modal>
 
