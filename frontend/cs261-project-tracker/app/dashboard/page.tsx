@@ -34,6 +34,7 @@ import {
   OrderedList,
   UnorderedList,
 } from '@chakra-ui/react'
+import Loading from "@/components/loading";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -272,5 +273,5 @@ export default function Dashboard() {
         );
     }
 
-    return <div>Loading...</div>
+    return <Loading />
 }

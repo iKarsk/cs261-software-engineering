@@ -6,6 +6,7 @@ import { signIn, useSession } from "next-auth/react"
 import { redirect } from 'next/navigation';
 import { useEffect } from "react";
 import Router from 'next/router'
+import Loading from '@/components/loading';
 
 export default function Home() {
     const {status, data} = useSession();
@@ -25,7 +26,7 @@ export default function Home() {
         if (status === "authenticated") redirect("/dashboard");
     }, [status]);
 
-    if (status === "loading") return <div>Loading...</div>;
+    if (status === "loading") return <Loading />;
 
     return (
         <div className={styles.container}>  

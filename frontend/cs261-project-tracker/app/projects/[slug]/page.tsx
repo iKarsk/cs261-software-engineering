@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
 import { Divider, Button, Box, useDisclosure } from '@chakra-ui/react'
+import Loading from "@/components/loading";
 
 export default function Page({
     params,
@@ -78,6 +79,6 @@ export default function Page({
     );
     }
 
-    return <div>Loading...</div>
+    return <Loading />
   }
   
