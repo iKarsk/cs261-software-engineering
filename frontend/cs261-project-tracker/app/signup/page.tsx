@@ -15,7 +15,7 @@ export default function Home() {
         const data = {
             forename: event.target.forename.value,
             surname: event.target.surname.value,
-            yearsofexperience: 5,
+            yearsofexperience: Number(event.target.experience.value),
             email: event.target.email.value,
             password: event.target.password.value,
         };
