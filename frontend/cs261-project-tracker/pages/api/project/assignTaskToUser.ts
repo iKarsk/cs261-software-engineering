@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 });
 
                 if (existingUserTask) {
-                    res.status(409).json({ message: 'User is already assigned to task' });
+                    return res.status(409).json({ message: 'User is already assigned to task' });
                 }
 
                 // Assign task to user

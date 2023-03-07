@@ -21,8 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				});
 
 				if (existingDeveloper) {
-				  res.status(409).json({
-				    error: `Project developer with p_id ${project} and u_id ${u_id} already exists`
+				  return res.status(409).json({
+				    message: `Project developer with p_id ${project} and u_id ${u_id} already exists`
 				  });
 				}
 

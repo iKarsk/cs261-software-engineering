@@ -7,17 +7,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { project, u_id } = 
+			const { project, email } = 
 				req.body as Invite;
 
 			try {
+				// Get user email from their id
+				const getUserId = await prisma.users.findUnique({
+					where: {
+						email: email,
+					},
+				});
+
+				if (!getUserId) {	
+					return res.status(404).json({ message: "User not found"});
+				}
+
+				let u_id = getUserId["id"];
+
+
 				// Check if invitation already exists
 				const existingInvitation = await prisma.user_invites.findUnique({
-				  where: { project_u_id: { project: project, u_id } },
+					where: { 
+						project_u_id: { 
+							project: project, u_id 
+						},
+					},
 				});
 
 				if (existingInvitation) {
-				  res.status(409).send('User is already invited to this project');
+				  	return res.status(409).json({ message: "User already invited"});
 				}
 				
 				// Create new invitation

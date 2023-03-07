@@ -45,7 +45,7 @@ export type Developer = {
 
 export type Invite = {
 	project: number;
-	u_id: number;
+	email: string;
 }
 
 export type Morale = {
@@ -58,5 +58,5 @@ export type Morale = {
 export type HandleInvite = {
 	project: number;
 	u_id: number;
-	accept: boolean:
+	accept: boolean;
 }
