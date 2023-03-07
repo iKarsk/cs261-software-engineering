@@ -46,6 +46,7 @@ export type Developer = {
 export type Invite = {
 	project: number;
 	email: string;
+	ismanager: boolean;
 }
 
 export type Morale = {

@@ -42,6 +42,7 @@ export default function Page({
     const {status, data} = useSession();
     const [project, setProject] = useState({id : undefined, name : "", start_date : ""});
     const [loaded, setLoaded] = useState(false);
+
     const [email, setEmail] = useState("");
     const [manager, setManager] = useState(false);
     const { isOpen: isInviteOpen, onOpen: onInviteOpen, onClose: onInviteClose } = useDisclosure();
@@ -77,6 +78,7 @@ export default function Page({
                     if(response.status === 200){
                         const json = await response.json();
                         setProject(json);
+			console.log(project);
                         setLoaded(true);
                     }else{
                         router.push("/dashboard");
@@ -97,6 +99,7 @@ export default function Page({
         const postData = {
 	    project: project.id,
             email: email,
+	    ismanager: manager,
         };
 
         const JSONdata = JSON.stringify(postData);

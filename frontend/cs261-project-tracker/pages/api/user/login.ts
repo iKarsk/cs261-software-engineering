@@ -18,13 +18,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				});
 
 				if (!user) {
-					return res.status(401).json({ message: "Wrong credentials. Try again."});
+					return res.status(401).send("Wrong credentials. Try again.");
 				}
 
 				const passwordMatch = await bcrypt.compare(password, user.password);
 
 				if (!passwordMatch) {
-					return res.status(401).json({ message: "Wrong credentials. Try again."});
+					return res.status(401).send("Wrong credentials. Try again.");
 				}
 
 				const userObj = {

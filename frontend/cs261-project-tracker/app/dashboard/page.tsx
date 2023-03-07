@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import styles from './page.module.css'
@@ -268,7 +268,7 @@ export default function Dashboard() {
 
                     </ModalContent>
                 </Modal>
-
+		<a href="/login" onClick={() => signOut()} className="btn-signin">Sign out</a>
 
             </div>
         );

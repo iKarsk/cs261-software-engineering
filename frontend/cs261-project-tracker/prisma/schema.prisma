@@ -60,6 +60,7 @@ model projects {
 model user_invites {
   project  Int
   u_id     Int
+  ismanager Boolean
   projects projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users    users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 

@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { project, email } = 
+			const { project, email, ismanager } = 
 				req.body as Invite;
 
 			try {
@@ -43,6 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					data: {
 						project: project,
 						u_id: u_id,
+						ismanager: ismanager,
 					},
 
 				});
