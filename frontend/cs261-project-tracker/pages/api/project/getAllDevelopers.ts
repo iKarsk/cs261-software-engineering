@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				});
 
 
-				let developers = allIds.map(a => a.project); // Extract user IDs
+				let developers = allIds.map(a => a.u_id); // Extract user IDs
 
 
 				// Get all user information of all users

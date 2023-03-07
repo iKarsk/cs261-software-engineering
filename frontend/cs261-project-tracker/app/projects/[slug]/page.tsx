@@ -126,7 +126,6 @@ export default function Page({
 
 	const responseJSON = await response.json();
 	setTeam(responseJSON);
-	console.log(team);
     }
 
 
