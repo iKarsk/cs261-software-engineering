@@ -18,15 +18,23 @@ import {
     ModalCloseButton,
   } from '@chakra-ui/react'
 
-  import {
-    FormControl,
-    FormLabel,
-    FormErrorMessage,
-    FormHelperText,
-    Input,
-    InputGroup,
-    InputLeftElement
-  } from '@chakra-ui/react'
+import {
+FormControl,
+FormLabel,
+FormErrorMessage,
+FormHelperText,
+Input,
+InputGroup,
+InputLeftElement
+} from '@chakra-ui/react'
+
+import {
+  List,
+  ListItem,
+  ListIcon,
+  OrderedList,
+  UnorderedList,
+} from '@chakra-ui/react'
 
 import { Checkbox, CheckboxGroup } from '@chakra-ui/react';
 
@@ -42,6 +50,9 @@ export default function Page({
     const {status, data} = useSession();
     const [project, setProject] = useState({id : undefined, name : "", start_date : ""});
     const [loaded, setLoaded] = useState(false);
+
+    const [team, setTeam] = useState<any[]>([]);
+    const { isOpen: isTeamOpen, onOpen: onTeamOpen, onClose: onTeamClose } = useDisclosure();
 
     const [email, setEmail] = useState("");
     const [manager, setManager] = useState(false);
@@ -78,7 +89,6 @@ export default function Page({
                     if(response.status === 200){
                         const json = await response.json();
                         setProject(json);
-			console.log(project);
                         setLoaded(true);
                     }else{
                         router.push("/dashboard");
@@ -91,6 +101,33 @@ export default function Page({
         }
 
     }, [status]);
+
+
+    const handleShowTeam = async () => {
+        onTeamOpen();
+
+        const postData = {
+	    project: project.id,
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/getAllDevelopers";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	const responseJSON = await response.json();
+	setTeam(responseJSON);
+	console.log(team);
+    }
 
 
     const handleInvites = async () => {
@@ -117,9 +154,9 @@ export default function Page({
         const response = await fetch(endpoint, options);
 
 	const responseJSON = await response.json();
-	
-	console.log(responseJSON);
 
+	console.log(responseJSON);
+	
 	if (response.status === 201) {
 		onInviteClose();
 	}	
@@ -139,42 +176,65 @@ export default function Page({
 
                 <Text>{project.start_date.substring(0, 10)}</Text>
 
-	    	<Button onClick={onInviteOpen} mt={5}>Invite User</Button>
+
+	    	<Button onClick={handleShowTeam} mt={5}>Show Team Members</Button>
 
 
 	    	<Modal
-                    isOpen={isInviteOpen}
-                    onClose={onInviteClose}
+                    isOpen={isTeamOpen}
+                    onClose={onTeamClose}
                     isCentered
                 >
                     <ModalOverlay />
 	            <ModalContent>
-                        <ModalHeader>Invite user to project</ModalHeader>
+                        <ModalHeader>Team Members List</ModalHeader>
                         <ModalCloseButton />
 
                         <ModalBody>
-                            <FormControl>
-                                <FormLabel>User Email</FormLabel>
-                                <Input placeholder="Email" onChange={event => setEmail(event.currentTarget.value)}/>
-                            </FormControl>
-
-
-                            <FormControl mt={4}>
-                                <Checkbox onChange={event => setManager(event.currentTarget.checked)}>Manager</Checkbox>
-                            </FormControl>
-
+			    <List spacing={3}>
+				    {team.map((e, i) => (
+					    <ListItem key={i}>{e.forename} {e.surname}</ListItem>
+				    ))}
+			    </List>
                         </ModalBody>
-                        <ModalFooter>
-                            <Button colorScheme='blue' mr={3} type="submit" onClick={handleInvites}>
-                                Save
-                            </Button>
-                            <Button onClick={onInviteClose}>Cancel</Button>
-                        </ModalFooter>
+	
+			<Button onClick={onInviteOpen} mt={5}>Invite User</Button>
+
+
+			<Modal
+			    isOpen={isInviteOpen}
+			    onClose={onInviteClose}
+			    isCentered
+			>
+			    <ModalOverlay />
+			    <ModalContent>
+				<ModalHeader>Invite user to project</ModalHeader>
+				<ModalCloseButton />
+
+				<ModalBody>
+				    <FormControl>
+					<FormLabel>User Email</FormLabel>
+					<Input placeholder="Email" onChange={event => setEmail(event.currentTarget.value)}/>
+				    </FormControl>
+
+
+				    <FormControl mt={4}>
+					<Checkbox onChange={event => setManager(event.currentTarget.checked)}>Manager</Checkbox>
+				    </FormControl>
+
+				</ModalBody>
+				<ModalFooter>
+				    <Button colorScheme='blue' mr={3} type="submit" onClick={handleInvites}>
+					Save
+				    </Button>
+				    <Button onClick={onInviteClose}>Cancel</Button>
+				</ModalFooter>
+
+			    </ModalContent>
+			</Modal>	
 
                     </ModalContent>
                 </Modal>	
-
-
 
 
             </div>
