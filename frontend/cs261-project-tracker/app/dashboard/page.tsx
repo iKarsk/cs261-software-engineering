@@ -4,8 +4,9 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress } from '@chakra-ui/react'
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/Nav";
 
 import {
     Modal,
@@ -173,6 +174,111 @@ export default function Dashboard() {
         }
 
         return (
+
+            <>
+            <Flex direction='column' width="100vw" minHeight="100vh" align="center">
+                <Navbar />
+                <Box textAlign="center" mt={20}>
+                    <Heading as='h1' size="2xl">Dashboard</Heading>
+                    <Heading as='h2' size='md' mt={2}>Welcome, {data?.user?.name?.slice(0, data.user.name?.lastIndexOf(" "))}!</Heading>
+                </Box>
+                <Flex gap="10px" justifyContent="center">
+                    <Button onClick={handleInvites} mt={5}>See Project Invites</Button>
+                    <Button onClick={onProjectOpen} mt={5}>Create new Project</Button>
+                </Flex>
+                <Flex mt={6} direction="column">
+                    <Heading as="h2" size="md">All projects</Heading>
+                    <Divider />
+                    
+                </Flex>
+                <Box w="clamp(300px, 40%, 400px)" h='fit' mt={5} display='flex' justifyContent='center' alignItems='center'>
+                    {projectsLoading ? <CircularProgress size='2rem' isIndeterminate color='green.300' /> : projects.length == 0 ? "You have no projects" :
+			    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
+				    {projects.map((e, i) => (
+					    <Link key={i} href={"/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id}><ListItem key={i}><Button>{e.name}</Button></ListItem></Link>
+				    ))}
+			    </List>
+		    }
+                </Box>
+            </Flex>
+
+            <Modal
+                    isOpen={isInviteOpen}
+                    onClose={onInviteClose}
+                    isCentered
+                >
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>Project Invites</ModalHeader>
+                        <ModalCloseButton />
+                        <ModalBody pb={6}>
+                            {loading ? "Loading..." : displayInvites()}
+                            
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button colorScheme='teal' onClick={onInviteClose}>Close</Button>
+                        </ModalFooter>
+                    </ModalContent>
+            </Modal>
+
+            <Modal
+                isOpen={isProjectOpen}
+                onClose={onProjectClose}
+                isCentered
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Create a new project</ModalHeader>
+                    <ModalCloseButton />
+
+
+                    <ModalBody pb={6}>
+                        <FormControl mt={4}>
+                            <FormLabel>Project Name</FormLabel>
+                            <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
+                        </FormControl>
+
+                        <FormControl mt={4}>
+                            <FormLabel>Deadline</FormLabel>
+                            <Input placeholder="Select date" type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
+                        </FormControl>
+
+                        <FormControl mt={4}>
+                            <FormLabel>Budget</FormLabel>
+
+                            <InputGroup>
+                                <InputLeftElement
+                                pointerEvents='none'
+                                color='gray.300'
+                                fontSize='1.2em'
+                                children='£'
+                                />
+                                <Input type="number" placeholder='Enter amount' onChange={event => setBudget(event.currentTarget.value)}/>
+
+                            </InputGroup>
+                            
+                        </FormControl>
+
+                        <FormControl mt={4}>
+                            <FormLabel>Repository Link</FormLabel>
+                            <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
+                        </FormControl>
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme='teal' mr={3} type="submit" onClick={handleNewProject}>
+                            Create
+                        </Button>
+                        <Button onClick={onProjectClose}>Cancel</Button>
+                    </ModalFooter>
+
+                </ModalContent>
+            </Modal>
+
+            </>
+            
+
+            /*
             <div className={styles.container}>
                 <h1>Welcome! You are signed in and can access this page.</h1>
                 <h2>{JSON.stringify(data.user, null, 2)}</h2>
@@ -271,7 +377,10 @@ export default function Dashboard() {
 		<a href="/login" onClick={() => signOut()} className="btn-signin">Sign out</a>
 
             </div>
+            */
+            
         );
+        
     }
 
     return <Loading />
