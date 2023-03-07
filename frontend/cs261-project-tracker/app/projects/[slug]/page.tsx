@@ -48,7 +48,7 @@ export default function Page({
 
     const router = useRouter();
     const {status, data} = useSession();
-    const [project, setProject] = useState({id : undefined, name : "", start_date : ""});
+    const [project, setProject] = useState({id : undefined, name : "", start_date : "", isManager : false});
     const [loaded, setLoaded] = useState(false);
 
     const [team, setTeam] = useState<any[]>([]);
@@ -58,7 +58,11 @@ export default function Page({
     const [manager, setManager] = useState(false);
     const { isOpen: isInviteOpen, onOpen: onInviteOpen, onClose: onInviteClose } = useDisclosure();
 
-
+    const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
+    const [projectName, setProjectName] = useState("");
+    const [deadline, setDeadline] = useState("");
+    const [budget, setBudget] = useState("");
+    const [repository, setRepository] = useState("");
 
     useEffect(() => {
         if (status === "unauthenticated") redirect("/login");
@@ -90,6 +94,7 @@ export default function Page({
                         const json = await response.json();
                         setProject(json);
                         setLoaded(true);
+			console.log(json);
                     }else{
                         router.push("/dashboard");
                     }
@@ -130,7 +135,6 @@ export default function Page({
 
 
     const handleInvites = async () => {
-        onInviteOpen();
 
         const postData = {
 	    project: project.id,
@@ -163,6 +167,34 @@ export default function Page({
     }
 
 
+    const handleEdit = async () => {
+
+        const postData = {
+	    project: project.id,
+            email: email,
+	    ismanager: manager,
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/inviteDeveloper";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	const responseJSON = await response.json();
+
+	console.log(responseJSON);
+	
+    }
+
     if (status === "authenticated" && loaded){
     return(
         <div className={styles.container}>
@@ -175,11 +207,10 @@ export default function Page({
 
                 <Text>{project.start_date.substring(0, 10)}</Text>
 
+		{ loaded ? ( project.isManager ? <div><Button onClick={handleShowTeam} mt={5}>Show Team Members</Button> <Button onClick={onEditOpen} mt={5}>Edit Project</Button></div> : "Not manager") : "Loading..."}
 
-	    	<Button onClick={handleShowTeam} mt={5}>Show Team Members</Button>
 
-
-	    	<Modal
+	        <Modal
                     isOpen={isTeamOpen}
                     onClose={onTeamClose}
                     isCentered
@@ -233,9 +264,60 @@ export default function Page({
 			</Modal>	
 
                     </ModalContent>
-                </Modal>	
+                </Modal>
+                <Modal
+                    isOpen={isEditOpen}
+                    onClose={onEditClose}
+                    isCentered
+                >
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>Change project details</ModalHeader>
+                        <ModalCloseButton />
 
 
+                        <ModalBody pb={6}>
+                            <FormControl mt={4}>
+                                <FormLabel>Project Name</FormLabel>
+                                <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
+                            </FormControl>
+
+                            <FormControl mt={4}>
+                                <FormLabel>Deadline</FormLabel>
+                                <Input placeholder="Select date" type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
+                            </FormControl>
+
+                            <FormControl mt={4}>
+                                <FormLabel>Budget</FormLabel>
+
+                                <InputGroup>
+                                    <InputLeftElement
+                                    pointerEvents='none'
+                                    color='gray.300'
+                                    fontSize='1.2em'
+                                    children='£'
+                                    />
+                                    <Input type="number" placeholder='Enter amount' onChange={event => setBudget(event.currentTarget.value)}/>
+
+                                </InputGroup>
+                                
+                            </FormControl>
+
+                            <FormControl mt={4}>
+                                <FormLabel>Repository Link</FormLabel>
+                                <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
+                            </FormControl>
+
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button colorScheme='blue' mr={3} type="submit" onClick={handleEdit}>
+                                Save
+                            </Button>
+                            <Button onClick={onEditClose}>Cancel</Button>
+                        </ModalFooter>
+
+                    </ModalContent>
+	    </Modal>
             </div>
     );
     }
