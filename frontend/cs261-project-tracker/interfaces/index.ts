@@ -20,6 +20,14 @@ export type ProjectInput = {
 	repository_link: string;
 }
 
+export type ProjectEdit = {
+	project: number;
+	name: string;
+	deadline: Date;
+	budget: number;
+	repository_link: string;
+}
+
 export type Task = {
 	id: number;
 	project: number;

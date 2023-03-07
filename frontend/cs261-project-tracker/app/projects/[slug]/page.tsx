@@ -48,7 +48,7 @@ export default function Page({
 
     const router = useRouter();
     const {status, data} = useSession();
-    const [project, setProject] = useState({id : undefined, name : "", start_date : "", isManager : false});
+    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : ""});
     const [loaded, setLoaded] = useState(false);
 
     const [team, setTeam] = useState<any[]>([]);
@@ -61,7 +61,7 @@ export default function Page({
     const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
     const [projectName, setProjectName] = useState("");
     const [deadline, setDeadline] = useState("");
-    const [budget, setBudget] = useState("");
+    const [budget, setBudget] = useState(0);
     const [repository, setRepository] = useState("");
 
     useEffect(() => {
@@ -168,16 +168,18 @@ export default function Page({
 
 
     const handleEdit = async () => {
-
+	
         const postData = {
 	    project: project.id,
-            email: email,
-	    ismanager: manager,
+	    name: projectName,
+	    deadline: deadline,
+	    budget: budget,
+	    repository_link: repository
         };
 
         const JSONdata = JSON.stringify(postData);
 
-        const endpoint="/api/project/inviteDeveloper";
+        const endpoint="/api/project/editProject";
 
         const options = {
             method: 'POST',
@@ -279,12 +281,12 @@ export default function Page({
                         <ModalBody pb={6}>
                             <FormControl mt={4}>
                                 <FormLabel>Project Name</FormLabel>
-                                <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
+                                <Input defaultValue={project.name} onChange={event => setProjectName(event.currentTarget.value)}/>
                             </FormControl>
 
                             <FormControl mt={4}>
                                 <FormLabel>Deadline</FormLabel>
-                                <Input placeholder="Select date" type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
+                                <Input defaultValue={project.deadline.substring(0,10)} type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
                             </FormControl>
 
                             <FormControl mt={4}>
@@ -297,7 +299,7 @@ export default function Page({
                                     fontSize='1.2em'
                                     children='£'
                                     />
-                                    <Input type="number" placeholder='Enter amount' onChange={event => setBudget(event.currentTarget.value)}/>
+                                    <Input type="number" defaultValue={Number(project.budget)} onChange={event => setBudget(Number(event.currentTarget.value))}/>
 
                                 </InputGroup>
                                 
@@ -305,7 +307,7 @@ export default function Page({
 
                             <FormControl mt={4}>
                                 <FormLabel>Repository Link</FormLabel>
-                                <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
+                                <Input defaultValue={project.repository_link} onChange={event => setRepository(event.currentTarget.value)}/>
                             </FormControl>
 
                         </ModalBody>
