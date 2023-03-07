@@ -6,7 +6,7 @@ import { signIn, useSession } from "next-auth/react"
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from "react";
 import Loading from '@/components/loading';
-import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, CircularProgress, InputGroup, InputRightElement } from '@chakra-ui/react';
+import { Divider, Box, Button, Flex, FormControl, FormLabel, Heading, Input, CircularProgress, InputGroup, InputRightElement } from '@chakra-ui/react';
 import ErrorMessage from '@/components/ErrorMessage';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 
@@ -47,7 +47,6 @@ export default function Home() {
 
 
         const response = await fetch(endpoint, options);
-        console.log(response);
 
         if (response.status === 200 || response.status === 201) {
             setLoading(false);
@@ -77,7 +76,7 @@ export default function Home() {
         return (
             
             <Flex width="100vw" height="100vh" align="center" justifyContent="center">
-            <Box p={8} maxWidth="600px" borderWidth={1} borderRadius={8} boxShadow="lg">
+            <Box p={8} width="clamp(300px, 40%, 400px)" borderWidth={1} borderRadius={8} boxShadow="lg">
                 <Box textAlign="center">
                     <Heading>Sign Up</Heading>
                 </Box>
@@ -112,9 +111,12 @@ export default function Home() {
                             </InputGroup>
                         </FormControl>
                         <Button type="submit" colorScheme="teal" variant="outline" width="full" mt={4}>
-                            {loading ? (<CircularProgress isIndeterminate size="24px" color="teal" />) : ('Sign in')}
+                            {loading ? (<CircularProgress isIndeterminate size="24px" color="teal" />) : ('Sign up')}
                         </Button>
                     </form>
+                    <Divider mt={6}/>
+                        <Heading as='h5' size='xs' textAlign='center' mt={4}>Already have an account?</Heading>
+                        <Button as={Link} href="/login" size="sm" colorScheme="teal" variant="outline" width="full" mt={4}>Login</Button>
                 </Box>
             </Box>
         </Flex>

@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import { useEffect, useState } from "react";
 import Router from 'next/router'
 import Loading from '@/components/loading';
-import { Box, Button, Flex, FormControl, FormLabel, Heading, Input, CircularProgress, InputGroup, InputRightElement } from '@chakra-ui/react';
+import { Divider, Box, Button, Flex, FormControl, FormLabel, Heading, Input, CircularProgress, InputGroup, InputRightElement } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import ErrorMessage from '@/components/ErrorMessage';
 
@@ -29,7 +29,7 @@ export default function Home() {
             redirect: false,
             callbackUrl: "/dashboard"
         });
-
+        
         if (res?.error === "CredentialsSignin") {
             setError("Invalid email or password");
         } else{
@@ -49,7 +49,7 @@ export default function Home() {
     if (status === "unauthenticated") {
         return (
             <Flex width="100vw" height="100vh" align="center" justifyContent="center">
-                <Box p={8} maxWidth="600px" borderWidth={1} borderRadius={8} boxShadow="lg">
+                <Box p={8} width="clamp(300px, 40%, 400px)" borderWidth={1} borderRadius={8} boxShadow="lg">
                     <Box textAlign="center">
                         <Heading>Login</Heading>
                     </Box>
@@ -75,6 +75,9 @@ export default function Home() {
                                 {loading ? (<CircularProgress isIndeterminate size="24px" color="teal" />) : ('Sign in')}
                             </Button>
                         </form>
+                        <Divider mt={6}/>
+                        <Heading as='h5' size='xs' textAlign='center' mt={4}>Don't have an account?</Heading>
+                        <Button as={Link} href="/signup" size="sm" colorScheme="teal" variant="outline" width="full" mt={4}>Sign Up</Button>
                     </Box>
                 </Box>
             </Flex>
