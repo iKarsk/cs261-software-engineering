@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 app = Flask(__name__)
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
 def predict():
     data = pd.read_csv("project_risk_data.csv")
     data = data.drop(columns=['priority'])
@@ -15,11 +15,15 @@ def predict():
     new_project = pd.DataFrame(new_project)
 
     data = pd.concat([data, new_project])
+    test = data.copy()
 
     encoded = pd.get_dummies(data, columns=["requirements",'project_category','requirement_category','risk_target_category','magnitude_of_risk','impact','dimension_of_risk'])
 
     y = encoded['risk_score'][:-1]
+    encoded = encoded.drop(columns=['risk_score'])
+    
     X = encoded.iloc[:-1,:]
+    test = encoded.iloc[-1:,:]
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
@@ -29,11 +33,13 @@ def predict():
     #print(GB.score(X_train, y_train))
     #print(GB.score(X_test, y_test))
 
-    test = encoded.iloc[-1:,:]
+    
     risk_score = GB.predict(test)[0]
 
     response = {
-        'risk_score': float(risk_score)
+        'risk_score': float(risk_score),
+        'n1': float(GB.score(X_train, y_train)),
+        'n2': float(GB.score(X_test, y_test)),
     }
     return jsonify(response)
 
@@ -41,11 +47,7 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 '''
-#Test API
-
-import requests
-
-new_project = {
+{
     'requirements': 300.0,
     'project_category': 2.0,
     'requirement_category': 7.0,
@@ -58,8 +60,5 @@ new_project = {
     'fixing_duration' : 6.0,
     'fix_cost' : 4.0
 }
-
-response = requests.post('http://localhost:5000/predict', json=new_project)
-print(response.json())
 
 '''
