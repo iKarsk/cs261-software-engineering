@@ -504,7 +504,7 @@ export default function Page({
                         </ModalBody>
                         <ModalFooter>
                             <Button colorScheme='blue' type="submit" onClick={submitMorale}>
-                                Save
+                                Check in
                             </Button>
                         </ModalFooter>
 
