@@ -172,10 +172,8 @@ export default function Page({
 
         console.log(response);
 
-        if(response.status === 201){
-            onMoraleClose();
-            setNeedMorale(false);
-        }
+        onMoraleClose();
+        setNeedMorale(false);
 
     }
     const handleShowTeam = async () => {
