@@ -10,7 +10,7 @@ datasource db {
 model morale {
   project     Int
   u_id        Int
-  submit_date DateTime @db.Date @default(now())
+  submit_date DateTime @default(now()) @db.Date
   morale      Int
   projects    projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users       users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -28,41 +28,43 @@ model project_developers {
   @@id([project, u_id])
 }
 
-model project_tasks {
-  id          Int          @id @default(autoincrement())
-  project     Int
-  name        String       @db.VarChar(100)
-  description String?      @db.VarChar(1000)
-  start_date  DateTime     @db.Date @default(now())
-  deadline    DateTime     @db.Date
-  end_date    DateTime?    @db.Date
-  progress    String?      @db.VarChar(100)
-  risk        Int?
-  projects    projects     @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  user_tasks  user_tasks[]
+model project_requirements {
+  id                   Int      @id @default(autoincrement())
+  project              Int
+  requirement          String?  @db.VarChar(100)
+  project_category     String?  @db.VarChar(100)
+  requirement_category String?  @db.VarChar(100)
+  risk_target_category String?  @db.VarChar(100)
+  probability          Float?   @db.DoublePrecision
+  impact               String?  @db.VarChar(100)
+  dimension_of_risk    String?  @db.VarChar(100)
+  affecting_no_modules Int?
+  fixing_duration      Int?
+  fixing_cost          Float?   @db.DoublePrecision
+  projects             projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model projects {
-  id                 Int                  @id @default(autoincrement())
-  name               String               @db.VarChar(100)
-  start_date         DateTime             @db.Date
-  deadline           DateTime             @db.Date
-  end_date           DateTime?            @db.Date
-  budget             Int
-  risk               Int?
-  repository_link    String               @db.VarChar(500)
-  morale             morale[]
-  project_developers project_developers[]
-  project_tasks      project_tasks[]
-  user_invites       user_invites[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(100)
+  start_date           DateTime               @db.Date
+  deadline             DateTime               @db.Date
+  end_date             DateTime?              @db.Date
+  budget               Int
+  risk                 Int?
+  repository_link      String                 @db.VarChar(500)
+  morale               morale[]
+  project_developers   project_developers[]
+  project_requirements project_requirements[]
+  user_invites         user_invites[]
 }
 
 model user_invites {
-  project  Int
-  u_id     Int
+  project   Int
+  u_id      Int
   ismanager Boolean
-  projects projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users    users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects  projects @relation(fields: [project], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users     users    @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([project, u_id])
 }
@@ -71,20 +73,10 @@ model users {
   id                 Int                  @id @default(autoincrement())
   forename           String               @db.VarChar(100)
   surname            String               @db.VarChar(100)
-  email              String               @db.VarChar(100) @unique
+  email              String               @unique @db.VarChar(100)
   password           String               @db.VarChar(100)
   years_experience   Int
   morale             morale[]
   project_developers project_developers[]
   user_invites       user_invites[]
-  user_tasks         user_tasks[]
-}
-
-model user_tasks {
-  task          Int
-  u_id          Int
-  users         users         @relation(fields: [u_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  project_tasks project_tasks @relation(fields: [task], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@id([task, u_id])
 }
