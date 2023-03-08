@@ -36,7 +36,7 @@ import {
   UnorderedList,
 } from '@chakra-ui/react'
 
-import { Checkbox, CheckboxGroup } from '@chakra-ui/react';
+import { Checkbox, CheckboxGroup, Stack } from '@chakra-ui/react';
 
 export default function Page({
     params,
@@ -69,8 +69,13 @@ export default function Page({
     const [taskName, setTaskName] = useState("");
     const [taskDescription, setTaskDescription] = useState("");
     const [taskDeadline, setTaskDeadline] = useState("");
-    const [allTasks, setAllTasks] = useState([]);
+    const [allTasks, setAllTasks] = useState<any[]>([]);
+    const [currentTask, setCurrentTask] = useState({name : "", description : "", deadline : ""});
+    const [currentTaskUsers, setCurrentTaskUsers] = useState<any[]>([]);
 	
+
+    const { isOpen: isTaskOpen, onOpen: onTaskOpen, onClose: onTaskClose } = useDisclosure();
+
     useEffect(() => {
         if (status === "unauthenticated") redirect("/login");
 
@@ -85,6 +90,7 @@ export default function Page({
 
 
                 const fetchData = async () => {
+		    // Get project details
                     const endpoint = "/api/project/getProject";
 
                     const options = {
@@ -97,6 +103,8 @@ export default function Page({
 
                     const response = await fetch(endpoint, options);
 			
+
+		    // Get all project tasks
 		    const endpointTask = "/api/project/getAllTasks";
 
 		    const optionsTask = {
@@ -104,18 +112,39 @@ export default function Page({
 			headers: {
 			    'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({userid: data?.user.id, projectid: projectid}),
+			body: JSON.stringify({projectid: projectid}),
 		    };
 
 		    const taskRes = await fetch(endpointTask, optionsTask);
 
-                    if(response.status === 200 && taskRes.status === 200){
+
+			// Get all project developers
+			const endpointDev="/api/project/getAllDevelopers";
+
+			const optionsDev = {
+			    method: 'POST',
+
+			    headers: {
+				'Content-Type': 'application/json',
+			    },
+			    
+		 	    body: JSON.stringify({project: projectid}),
+			};
+
+			const devRes = await fetch(endpointDev, optionsDev);
+
+                    if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
                         const json = await response.json();
                         setProject(json);
 			console.log(json);	
+
 			const taskJson = await taskRes.json();
 			setAllTasks(taskJson);
 			console.log(taskJson);
+
+			const devJson = await devRes.json();
+			setTeam(devJson);
+			console.log(devJson)
 
 			setLoaded(true);
                     }else{
@@ -134,26 +163,6 @@ export default function Page({
     const handleShowTeam = async () => {
         onTeamOpen();
 
-        const postData = {
-	    project: project.id,
-        };
-
-        const JSONdata = JSON.stringify(postData);
-
-        const endpoint="/api/project/getAllDevelopers";
-
-        const options = {
-            method: 'POST',
-
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSONdata,
-        };
-        const response = await fetch(endpoint, options);
-
-	const responseJSON = await response.json();
-	setTeam(responseJSON);
     }
 
 
@@ -251,6 +260,35 @@ export default function Page({
 	
     }
 
+
+    const handleShowTask = async (task:any) => {
+        setCurrentTask(task)
+	onTaskOpen();
+	
+        const postData = {
+		taskid: task.id,
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/getTaskUsers";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	const responseJSON = await response.json();
+
+	console.log(responseJSON);
+	setCurrentTaskUsers(responseJSON.map((a: any) => a.id));
+	
+    }
     if (status === "authenticated" && loaded){
     return(
         <div className={styles.container}>
@@ -265,11 +303,40 @@ export default function Page({
 
 		    <List spacing={3}>
 			    {allTasks.map((e, i) => (
-				    <ListItem key={i}>{e.name} {e.description} {e.deadline}</ListItem>
+				    <ListItem key={i}><Button onClick={() => handleShowTask(e)}>{e.name}</Button></ListItem>
 			    ))}
 		    </List>
 		{  project.isManager ? <div><Button onClick={onTaskFormOpen} mt={5}>Add Task</Button> <Button onClick={handleShowTeam} mt={5}>Show Team Members</Button> <Button onClick={onEditOpen} mt={5}>Edit Project</Button></div> : "Not manager" }
 
+                <Modal
+                    isOpen={isTaskOpen}
+                    onClose={onTaskClose}
+                    isCentered
+                >
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>{currentTask.name}</ModalHeader>
+                        <ModalCloseButton />
+
+
+                        <ModalBody pb={6}>
+	    			{currentTask.description} 
+	    			{currentTask.deadline}
+	    			<br />
+	    			Assign Task
+				<Stack spacing={5} direction='column'>
+					    {team.map((e, i) => (
+						    <Checkbox defaultChecked={currentTaskUsers.includes(e.id)} key={i}>{e.forename} {e.surname}</Checkbox>
+					    ))}
+	    			</Stack>
+
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button onClick={onTaskClose}>Done</Button>
+                        </ModalFooter>
+
+                    </ModalContent>
+	    </Modal>
 
                 <Modal
                     isOpen={isTaskFormOpen}
