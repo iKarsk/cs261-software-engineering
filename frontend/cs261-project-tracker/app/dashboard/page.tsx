@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress, Grid, GridItem } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress, Grid, GridItem, Select } from '@chakra-ui/react'
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Nav";
 import { CheckIcon, CloseIcon } from '@chakra-ui/icons'
@@ -276,22 +276,27 @@ export default function Dashboard() {
 
                     <ModalBody pb={6}>
                         <form>
-                            <FormControl mt={4}>
+                            <FormControl mt={4} isRequired>
                                 <FormLabel>Project Name</FormLabel>
                                 <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
                             </FormControl>
 
-                            <FormControl mt={4}>
+                            <FormControl mt={4} isRequired>
                                 <FormLabel>Project Category</FormLabel>
-                                <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
+                                <Select placeholder="Select Option" onChange={event => setProjectCategory(event.currentTarget.value)}>
+                                    <option value="1">Transaction Processing System</option>
+                                    <option value="2">Management Information System</option>
+                                    <option value="3">Enterprise System</option>
+                                    <option value="4">Safety Critical System</option>
+                                </Select>
                             </FormControl>
 
-                            <FormControl mt={4}>
+                            <FormControl mt={4} isRequired>
                                 <FormLabel>Deadline</FormLabel>
                                 <Input placeholder="Select date" type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
                             </FormControl>
 
-                            <FormControl mt={4}>
+                            <FormControl mt={4} isRequired>
                                 <FormLabel>Budget</FormLabel>
 
                                 <InputGroup>
@@ -311,7 +316,7 @@ export default function Dashboard() {
                                 <FormLabel>Repository Link</FormLabel>
                                 <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
                             </FormControl>
-                        </form>
+                            </form>
 
                     </ModalBody>
                     <ModalFooter>
