@@ -54,6 +54,7 @@ export default function Dashboard() {
 
     const [newProject, setNewProject] = useState({});
     const [projectName, setProjectName] = useState("");
+    const [projectCategory, setProjectCategory] = useState("");
     const [deadline, setDeadline] = useState("");
     const [budget, setBudget] = useState("");
     const [repository, setRepository] = useState("");
@@ -274,36 +275,43 @@ export default function Dashboard() {
 
 
                     <ModalBody pb={6}>
-                        <FormControl mt={4}>
-                            <FormLabel>Project Name</FormLabel>
-                            <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
-                        </FormControl>
+                        <form>
+                            <FormControl mt={4}>
+                                <FormLabel>Project Name</FormLabel>
+                                <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
+                            </FormControl>
 
-                        <FormControl mt={4}>
-                            <FormLabel>Deadline</FormLabel>
-                            <Input placeholder="Select date" type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
-                        </FormControl>
+                            <FormControl mt={4}>
+                                <FormLabel>Project Category</FormLabel>
+                                <Input placeholder="Project Name" onChange={event => setProjectName(event.currentTarget.value)}/>
+                            </FormControl>
 
-                        <FormControl mt={4}>
-                            <FormLabel>Budget</FormLabel>
+                            <FormControl mt={4}>
+                                <FormLabel>Deadline</FormLabel>
+                                <Input placeholder="Select date" type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
+                            </FormControl>
 
-                            <InputGroup>
-                                <InputLeftElement
-                                pointerEvents='none'
-                                color='gray.300'
-                                fontSize='1.2em'
-                                children='£'
-                                />
-                                <Input type="number" placeholder='Enter amount' onChange={event => setBudget(event.currentTarget.value)}/>
+                            <FormControl mt={4}>
+                                <FormLabel>Budget</FormLabel>
 
-                            </InputGroup>
-                            
-                        </FormControl>
+                                <InputGroup>
+                                    <InputLeftElement
+                                    pointerEvents='none'
+                                    color='gray.300'
+                                    fontSize='1.2em'
+                                    children='£'
+                                    />
+                                    <Input type="number" placeholder='Enter amount' onChange={event => setBudget(event.currentTarget.value)}/>
 
-                        <FormControl mt={4}>
-                            <FormLabel>Repository Link</FormLabel>
-                            <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
-                        </FormControl>
+                                </InputGroup>
+                                
+                            </FormControl>
+
+                            <FormControl mt={4}>
+                                <FormLabel>Repository Link</FormLabel>
+                                <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
+                            </FormControl>
+                        </form>
 
                     </ModalBody>
                     <ModalFooter>
