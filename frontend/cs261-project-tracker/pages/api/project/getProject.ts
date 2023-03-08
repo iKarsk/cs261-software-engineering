@@ -27,8 +27,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					    }
 					})
 
+					const morale = await prisma.morale.findMany({
+						where: {
+							project: Number(projectid),
+							u_id: Number(userid),
+							submit_date: new Date(),
+							}
+						}
+					)
+
+				
 					const jsonOBJ = JSON.parse(JSON.stringify(project));
 					jsonOBJ.isManager = projectDeveloper.ismanager;
+					jsonOBJ.morale = (morale.length > 0);
 
 
 					res.status(200).json(jsonOBJ);

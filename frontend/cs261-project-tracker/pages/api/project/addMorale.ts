@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { project, u_id, submit_date, morale } = 
+			const { project, u_id, morale } = 
 				req.body as Morale;
 
 			try {
@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					data: {
 						project: project,
 						u_id: u_id,
-						submit_date: submit_date,
+						submit_date: new Date(),
 						morale: morale,
 					},
 
