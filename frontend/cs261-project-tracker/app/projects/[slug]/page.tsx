@@ -8,6 +8,8 @@ import styles from './page.module.css'
 import { Divider, Button, Box, useDisclosure, Heading, Text } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 
+import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
+
 import {
     Modal,
     ModalOverlay,
@@ -36,6 +38,14 @@ import {
   UnorderedList,
 } from '@chakra-ui/react'
 
+import {
+    Slider,
+    SliderTrack,
+    SliderFilledTrack,
+    SliderThumb,
+    SliderMark,
+  } from '@chakra-ui/react'
+
 import { Checkbox, CheckboxGroup } from '@chakra-ui/react';
 
 export default function Page({
@@ -50,6 +60,10 @@ export default function Page({
     const {status, data} = useSession();
     const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : ""});
     const [loaded, setLoaded] = useState(false);
+
+    const [needMorale, setNeedMorale] = useState(false);
+    const [morale, setMorale] = useState(0);
+    const { isOpen: isMoraleOpen, onOpen: onMoraleOpen, onClose: onMoraleClose } = useDisclosure();
 
     const [team, setTeam] = useState<any[]>([]);
     const { isOpen: isTeamOpen, onOpen: onTeamOpen, onClose: onTeamClose } = useDisclosure();
@@ -94,7 +108,8 @@ export default function Page({
                         const json = await response.json();
                         setProject(json);
                         setLoaded(true);
-			console.log(json);
+                        setNeedMorale(!json.morale);
+			            console.log(json.morale);
                     }else{
                         router.push("/dashboard");
                     }
@@ -108,6 +123,37 @@ export default function Page({
     }, [status]);
 
 
+    const submitMorale = async () => {
+        const postData = {
+            project: Number(project.id),
+            u_id: Number(data?.user.id),
+            morale: Number(morale),
+        }
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/addMorale";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	    const responseJSON = await response.json();
+
+        console.log(response);
+
+        if(response.status === 201){
+            onMoraleClose();
+            setNeedMorale(false);
+        }
+
+    }
     const handleShowTeam = async () => {
         onTeamOpen();
 
@@ -166,6 +212,12 @@ export default function Page({
 
     }
 
+    const labelStyles = {
+        mt: '3',
+        ml: '-2.5',
+        fontSize: '2xl',
+      }
+
 
     const handleEdit = async () => {
 	
@@ -212,7 +264,7 @@ export default function Page({
 		{ loaded ? ( project.isManager ? <div><Button onClick={handleShowTeam} mt={5}>Show Team Members</Button> <Button onClick={onEditOpen} mt={5}>Edit Project</Button></div> : "Not manager") : "Loading..."}
 
 
-	        <Modal
+	    <Modal
                     isOpen={isTeamOpen}
                     onClose={onTeamClose}
                     isCentered
@@ -240,34 +292,35 @@ export default function Page({
 			>
 			    <ModalOverlay />
 			    <ModalContent>
-				<ModalHeader>Invite user to project</ModalHeader>
-				<ModalCloseButton />
+				    <ModalHeader>Invite user to project</ModalHeader>
+				    <ModalCloseButton />
 
-				<ModalBody>
-				    <FormControl>
-					<FormLabel>User Email</FormLabel>
-					<Input placeholder="Email" onChange={event => setEmail(event.currentTarget.value)}/>
-				    </FormControl>
+                    <ModalBody>
+                        <FormControl>
+                            <FormLabel>User Email</FormLabel>
+                            <Input placeholder="Email" onChange={event => setEmail(event.currentTarget.value)}/>
+                        </FormControl>
 
 
-				    <FormControl mt={4}>
-					<Checkbox onChange={event => setManager(event.currentTarget.checked)}>Manager</Checkbox>
-				    </FormControl>
+                        <FormControl mt={4}>
+                            <Checkbox onChange={event => setManager(event.currentTarget.checked)}>Manager</Checkbox>
+                        </FormControl>
 
-				</ModalBody>
-				<ModalFooter>
-				    <Button colorScheme='blue' mr={3} type="submit" onClick={handleInvites}>
-					Save
-				    </Button>
-				    <Button onClick={onInviteClose}>Cancel</Button>
-				</ModalFooter>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme='blue' mr={3} type="submit" onClick={handleInvites}>
+                        Save
+                        </Button>
+                        <Button onClick={onInviteClose}>Cancel</Button>
+                    </ModalFooter>
 
 			    </ModalContent>
 			</Modal>	
 
                     </ModalContent>
-                </Modal>
-                <Modal
+        </Modal>
+        
+        <Modal
                     isOpen={isEditOpen}
                     onClose={onEditClose}
                     isCentered
@@ -316,6 +369,45 @@ export default function Page({
                                 Save
                             </Button>
                             <Button onClick={onEditClose}>Cancel</Button>
+                        </ModalFooter>
+
+                    </ModalContent>
+	    </Modal>
+
+        <Modal
+                    isOpen={needMorale}
+                    onClose={onMoraleClose}
+                    isCentered
+                >
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>Morale Check-in</ModalHeader>
+
+                        <ModalBody pb={6}>
+                            <Slider defaultValue={3} min={0} max={6} step={1} aria-label='morale slider' onChangeEnd={(val) => setMorale(val)}>
+                            <SliderMark value={0} {...labelStyles}>
+                                < FaRegFlushed />
+                            </SliderMark>
+
+                            <SliderMark value={3} {...labelStyles}>
+                                < FaRegMeh />
+                            </SliderMark>
+
+                            <SliderMark value={6} {...labelStyles}>
+                                < FaRegGrinBeam />
+                            </SliderMark>
+                                <SliderTrack bg='teal'>
+                                    <Box position="relative" right={10} />
+                                    <SliderFilledTrack bg='tomato' />
+                                </SliderTrack>
+                                <SliderThumb boxSize={3} bg="tomato" />
+                            </Slider>
+
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button colorScheme='blue' type="submit" onClick={submitMorale}>
+                                Save
+                            </Button>
                         </ModalFooter>
 
                     </ModalContent>
