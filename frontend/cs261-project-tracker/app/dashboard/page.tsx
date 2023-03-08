@@ -4,10 +4,10 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress, Grid, GridItem } from '@chakra-ui/react'
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Nav";
-
+import { CheckIcon, CloseIcon } from '@chakra-ui/icons'
 import {
     Modal,
     ModalOverlay,
@@ -50,6 +50,8 @@ export default function Dashboard() {
     const [projects, setProjects] = useState<any[]>([]);
     const [projectsLoading, setProjectsLoading] = useState(false);
 
+    const [testChange, setTestChange] = useState(true);
+
     const [newProject, setNewProject] = useState({});
     const [projectName, setProjectName] = useState("");
     const [deadline, setDeadline] = useState("");
@@ -82,7 +84,8 @@ export default function Dashboard() {
             });
         }
 
-    }, [status]);
+
+    }, [status, testChange]);
 
     
     const handleInvites = async () => {
@@ -115,7 +118,35 @@ export default function Dashboard() {
 
     }
 
+    const respondInvite = async (projectid: Number, action: boolean) => {
 
+        const postData = {
+            project: projectid,
+            u_id: data?.user.id,
+            accept: action
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/user/handleInvite";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+        const responseJSON = await response.json();
+
+        if(action){
+            setTestChange(!testChange);
+        }
+
+    }
 
     const handleNewProject = async () => {
         setLoading(true);
@@ -158,17 +189,27 @@ export default function Dashboard() {
         const displayInvites = () => {
 
             if(invites.length){
-                const inviteList = invites.map((invite) => {
-                    return (
-                        <div>
-                            <h3>Invite Name</h3>
-                        </div>
-                    )
-                });
-    
-                return inviteList;    
+                return(
+                    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
+                        {invites.map((e, i) => (
+
+                            <Flex width="100%" key={i} align="center">
+                                <ListItem key={i} maxWidth="60%">{e.name}</ListItem>
+                                <Spacer />
+                                <Flex gap={1}>
+                                    <Button key={i + "accept"} onClick={() => {
+                                        respondInvite(e.id, true);
+                                        console.log("Accept");
+                                        }}><CheckIcon /></Button>
+                                    <Button key={i + "decline"} onClick={() => respondInvite(e.id, true)}><CloseIcon /></Button>
+                                </Flex>
+                            </Flex>
+
+                        ))}
+                    </List>
+                );
             }else{
-                return <h3>You have no invites</h3>
+                return <h2>You have no invites</h2>
             }
 
         }
