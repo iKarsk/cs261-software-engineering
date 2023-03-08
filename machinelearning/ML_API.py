@@ -1,70 +1,65 @@
 from flask import Flask, jsonify, request
+
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.neural_network import MLPRegressor
-from sklearn.naive_bayes import GaussianNB
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
 app = Flask(__name__)
 
-data = pd.read_csv("project_risk_data.csv")
-
-X = data[['requirements', 'project_category', 'requirement_category', 'risk_target_category', 'probability', 'magnitude_of_risk', 'impact', 'dimension_of_risk', 'affecting_no_of_modules', 'fixing_duration', 'fix_cost', 'priority']]
-y = data['risk_score']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-GB = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
-GB.fit(X_train, y_train)
-
-DT = DecisionTreeRegressor(random_state=42)
-DT.fit(X_train, y_train)
-
-NN = MLPRegressor(hidden_layer_sizes=(100, 50), activation='relu',solver='adam', alpha=0.001, max_iter=500, random_state=42)
-NN.fit(X_train, y_train)
-
-NB = GaussianNB()
-NB.fit(X_train, y_train)
-
-LR = LinearRegression()
-LR.fit(X_train, y_train)
-
 @app.route('/predict', methods=['POST'])
-def predict_risk_score():
-    data = request.get_json()
+def predict():
+    data = pd.read_csv("project_risk_data.csv")
+    data = data.drop(columns=['priority'])
 
-    new_project = pd.DataFrame({
-        'requirements': [data['requirements']],
-        'project_category': [data['project_category']],
-        'requirement_category': [data['requirement_category']],
-        'risk_target_category': [data['risk_target_category']],
-        'probability': [data['probability']],
-        'magnitude_of_risk': [data['magnitude_of_risk']],
-        'impact': [data['impact']],
-        'dimension_of_risk': [data['dimension_of_risk']],
-        'affecting_no_of_modules': [data['affecting_no_of_modules']],
-        'fixing_duration': [data['fixing_duration']],
-        'fix_cost': [data['fix_cost']],
-        'priority': [data['priority']]
-    })
+    new_project = request.get_json()
+    new_project = pd.DataFrame(new_project)
 
-    risk_score_GB = GB.predict(new_project)[0]
-    risk_score_DT = DT.predict(new_project)[0]
-    risk_score_NN = NN.predict(new_project)[0]
-    risk_score_NB = NB.predict(new_project)[0]
-    risk_score_LR = LR.predict(new_project)[0]
+    data = pd.concat([data, new_project])
+
+    encoded = pd.get_dummies(data, columns=["requirements",'project_category','requirement_category','risk_target_category','magnitude_of_risk','impact','dimension_of_risk'])
+
+    y = encoded['risk_score'][:-1]
+    X = encoded.iloc[:-1,:]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+
+    GB = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
+    GB.fit(X_train, y_train)
+
+    #print(GB.score(X_train, y_train))
+    #print(GB.score(X_test, y_test))
+
+    test = encoded.iloc[-1:,:]
+    risk_score = GB.predict(test)[0]
 
     response = {
-        'GB': float(risk_score_GB),
-        'DT': float(risk_score_DT),
-        'NN': float(risk_score_NN),
-        'NB': float(risk_score_NB),
-        'LR': float(risk_score_LR)
+        'risk_score': float(risk_score)
     }
-
     return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+'''
+#Test API
+
+import requests
+
+new_project = {
+    'requirements': 300.0,
+    'project_category': 2.0,
+    'requirement_category': 7.0,
+    'risk_target_category': 17.0,
+    'probability' : 11.6,
+    'magnitude_of_risk' : 2.0,
+    'impact' : 0.0,
+    'dimension_of_risk' : 12.0,
+    'affecting_no_of_modules' : 1.0,
+    'fixing_duration' : 6.0,
+    'fix_cost' : 4.0
+}
+
+response = requests.post('http://localhost:5000/predict', json=new_project)
+print(response.json())
+
+'''
