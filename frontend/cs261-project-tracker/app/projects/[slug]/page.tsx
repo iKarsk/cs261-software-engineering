@@ -64,6 +64,13 @@ export default function Page({
     const [budget, setBudget] = useState(0);
     const [repository, setRepository] = useState("");
 
+
+    const { isOpen: isTaskFormOpen, onOpen: onTaskFormOpen, onClose: onTaskFormClose } = useDisclosure();
+    const [taskName, setTaskName] = useState("");
+    const [taskDescription, setTaskDescription] = useState("");
+    const [taskDeadline, setTaskDeadline] = useState("");
+    const [allTasks, setAllTasks] = useState([]);
+	
     useEffect(() => {
         if (status === "unauthenticated") redirect("/login");
 
@@ -89,12 +96,28 @@ export default function Page({
                     };
 
                     const response = await fetch(endpoint, options);
+			
+		    const endpointTask = "/api/project/getAllTasks";
 
-                    if(response.status === 200){
+		    const optionsTask = {
+			method: 'POST',
+			headers: {
+			    'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({userid: data?.user.id, projectid: projectid}),
+		    };
+
+		    const taskRes = await fetch(endpointTask, optionsTask);
+
+                    if(response.status === 200 && taskRes.status === 200){
                         const json = await response.json();
                         setProject(json);
-                        setLoaded(true);
-			console.log(json);
+			console.log(json);	
+			const taskJson = await taskRes.json();
+			setAllTasks(taskJson);
+			console.log(taskJson);
+
+			setLoaded(true);
                     }else{
                         router.push("/dashboard");
                     }
@@ -197,6 +220,37 @@ export default function Page({
 	
     }
 
+
+    const handleNewTask = async () => {
+	
+        const postData = {
+	    project: project.id,
+	    name: taskName,
+	    description: taskDescription,
+	    deadline: taskDeadline,
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/addTask";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	const responseJSON = await response.json();
+
+	console.log(responseJSON);
+	onTaskFormClose();
+	
+    }
+
     if (status === "authenticated" && loaded){
     return(
         <div className={styles.container}>
@@ -209,8 +263,51 @@ export default function Page({
 
                 <Text>{project.start_date.substring(0, 10)}</Text>
 
-		{ loaded ? ( project.isManager ? <div><Button onClick={handleShowTeam} mt={5}>Show Team Members</Button> <Button onClick={onEditOpen} mt={5}>Edit Project</Button></div> : "Not manager") : "Loading..."}
+		    <List spacing={3}>
+			    {allTasks.map((e, i) => (
+				    <ListItem key={i}>{e.name} {e.description} {e.deadline}</ListItem>
+			    ))}
+		    </List>
+		{  project.isManager ? <div><Button onClick={onTaskFormOpen} mt={5}>Add Task</Button> <Button onClick={handleShowTeam} mt={5}>Show Team Members</Button> <Button onClick={onEditOpen} mt={5}>Edit Project</Button></div> : "Not manager" }
 
+
+                <Modal
+                    isOpen={isTaskFormOpen}
+                    onClose={onTaskFormClose}
+                    isCentered
+                >
+                    <ModalOverlay />
+                    <ModalContent>
+                        <ModalHeader>Add Task</ModalHeader>
+                        <ModalCloseButton />
+
+
+                        <ModalBody pb={6}>
+                            <FormControl mt={4}>
+                                <FormLabel>Name</FormLabel>
+                                <Input placeholder="Task Name" onChange={event => setTaskName(event.currentTarget.value)}/>
+                            </FormControl>
+
+                            <FormControl mt={4}>
+                                <FormLabel>Description</FormLabel>
+                                <Input placeholder="Description of task" onChange={event => setTaskDescription(event.currentTarget.value)}/>
+                            </FormControl>
+
+                            <FormControl mt={4}>
+                                <FormLabel>Deadline</FormLabel>
+                                <Input placeholder="Deadline of task" type="date" onChange={event => setTaskDeadline(event.currentTarget.value)}/>
+                            </FormControl>
+
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button colorScheme='blue' mr={3} type="submit" onClick={handleNewTask}>
+                                Save
+                            </Button>
+                            <Button onClick={onTaskFormClose}>Cancel</Button>
+                        </ModalFooter>
+
+                    </ModalContent>
+	    </Modal>
 
 	        <Modal
                     isOpen={isTeamOpen}

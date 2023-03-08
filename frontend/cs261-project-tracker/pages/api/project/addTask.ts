@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { project, name, description, start_date, deadline, end_date, progress, risk } = 
+			const { project, name, description, deadline } = 
 				req.body as Task;
 
 			try {
@@ -16,11 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 						project: project,
 						name: name,
 						description: description,
-						start_date: start_date,
-						deadline: deadline,
-						end_date: end_date,
-						progress: progress,
-						risk: risk,
+						start_date: new Date(),
+						deadline: new Date(deadline),
 					},
 
 				});
