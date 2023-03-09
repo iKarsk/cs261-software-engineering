@@ -4,7 +4,7 @@ body {
   margin: 0;
   min-width: 100vw;
   min-height: 100vh;
-  font-family: "Rubik", sans-serif;
+  /* font-family: "Rubik", sans-serif; */
 }
 
 :root {
@@ -12,7 +12,7 @@ body {
   --violet: rgb(103, 58, 183);
   --pink: rgb(244, 143, 177);
 }
-
+/*
 p{
   color: white;
   font-size: clamp(10em, 15vw, 12em);
@@ -21,3 +21,4 @@ p{
   font-weight: 400;
   text-align: center;
 }
+*/
