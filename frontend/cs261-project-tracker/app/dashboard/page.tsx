@@ -237,7 +237,7 @@ export default function Dashboard() {
                     {projectsLoading ? <CircularProgress size='2rem' isIndeterminate color='green.300' /> : projects.length == 0 ? "You have no projects" :
 			    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
 				    {projects.map((e, i) => (
-					    <Link key={i} href={"/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id}><ListItem key={i}><Button>{e.name}</Button></ListItem></Link>
+					    <ListItem key={i}><Button onClick={() => router.push("/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id)}>{e.name}</Button></ListItem>
 				    ))}
 			    </List>
 		    }

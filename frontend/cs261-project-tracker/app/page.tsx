@@ -14,7 +14,7 @@ export default function Home() {
       <Flex direction="column" align="center" justify="center">
       <Heading as="h1" size="3xl" mb={2}>Project Tracker</Heading>
       <Heading as="h2" size="md">A project management tool for CS261</Heading>
-      <Button colorScheme="teal" mt={3} onClick={() => router.push("/login")}>Login</Button>
+      <Button colorScheme="teal" mt={3} onClick={() => router.push("/login")}>Login &nbsp;<ArrowForwardIcon /></Button>
       </Flex>
       <Spacer />
 
