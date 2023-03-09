@@ -48,6 +48,15 @@ import {
     SliderMark,
   } from '@chakra-ui/react'
 
+  import {
+    Stat,
+    StatLabel,
+    StatNumber,
+    StatHelpText,
+    StatArrow,
+    StatGroup,
+  } from '@chakra-ui/react'
+
 
 export default function Page({
     params,
@@ -65,6 +74,8 @@ export default function Page({
     const [needMorale, setNeedMorale] = useState(false);
     const [morale, setMorale] = useState(0);
     const { isOpen: isMoraleOpen, onOpen: onMoraleOpen, onClose: onMoraleClose } = useDisclosure();
+
+    const [allMorales, setAllMorales] = useState({AvgDayMorale: 0, AvgWeekMorale: 0, DayMorale: []});
 
     const [team, setTeam] = useState<any[]>([]);
     const { isOpen: isTeamOpen, onOpen: onTeamOpen, onClose: onTeamClose } = useDisclosure();
@@ -117,6 +128,23 @@ export default function Page({
                     };
 
                     const response = await fetch(endpoint, options);
+
+                    // Get all morale details
+
+                    const endpointMorale = "/api/project/getMorales";
+
+                    const optionsMorale = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({projectid: projectid}),
+                    };
+
+                    const moraleResponse = await fetch(endpointMorale, optionsMorale);
+
+
+                    
 			
 
 		    // Get all project tasks
@@ -151,19 +179,25 @@ export default function Page({
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
                         const json = await response.json();
                         setProject(json);
-			console.log(json);	
+                        //console.log(json);	
 
-			const taskJson = await taskRes.json();
-			setAllTasks(taskJson);
-			console.log(taskJson);
+                        const taskJson = await taskRes.json();
+                        setAllTasks(taskJson);
+                        //console.log(taskJson);
 
-			const devJson = await devRes.json();
-			setTeam(devJson);
-			console.log(devJson)
+                        const devJson = await devRes.json();
+                        setTeam(devJson);
+                        //console.log(devJson);
 
-			setLoaded(true);
+                        const moraleJson = await moraleResponse.json();
+                        console.log("Morale object:")
+                        console.log(moraleJson);
+                        setAllMorales(moraleJson);
+
                         setNeedMorale(!json.morale);
-			            console.log(json.morale);
+                        setLoaded(true);
+                        
+			            //console.log(json.morale);
                     }else{
                         router.push("/dashboard");
                     }
@@ -358,7 +392,41 @@ export default function Page({
 				    <ListItem key={i}><Button onClick={() => handleShowTask(e)}>{e.name}</Button></ListItem>
 			    ))}
 		    </List>
-		{  project.isManager ? <div><Button onClick={onTaskFormOpen} mt={5}>Add Task</Button> <Button onClick={handleShowTeam} mt={5}>Show Team Members</Button> <Button onClick={onEditOpen} mt={5}>Edit Project</Button></div> : "Not manager" }
+		{  project.isManager ? (
+        <div>
+            <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>
+            <Button onClick={handleShowTeam} mt={5}>Show Team Members</Button>
+            <Button onClick={onEditOpen} mt={5}>Edit Project</Button>
+            <Box bg="white" width="20%" borderRadius={4} mt={2}>
+                <Stat>
+                    <StatLabel>Team Morale</StatLabel>
+                    <StatNumber>{allMorales.AvgDayMorale}</StatNumber>
+                    <StatHelpText>
+                        <StatArrow type={allMorales.AvgDayMorale >= allMorales.AvgWeekMorale ? 'increase' : 'decrease'} />
+                        {Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100}%
+                    </StatHelpText>
+                </Stat>
+            </Box>
+
+            <Slider defaultValue={allMorales.AvgWeekMorale} min={0} max={6} step={1} aria-label='Week Morale' isDisabled>
+                            <SliderMark value={0} {...labelStyles}>
+                                < FaRegFlushed />
+                            </SliderMark>
+
+                            <SliderMark value={3} {...labelStyles}>
+                                < FaRegMeh />
+                            </SliderMark>
+
+                            <SliderMark value={6} {...labelStyles}>
+                                < FaRegGrinBeam />
+                            </SliderMark>
+                                    <SliderFilledTrack bg='tomato' />
+                                <SliderTrack bg='teal'>
+                                    <Box position="relative" right={10} />
+                                </SliderTrack>
+                                <SliderThumb boxSize={3} bg="tomato" />
+                            </Slider>
+        </div>) : "Not manager" }
 
                 <Modal
                     isOpen={isTaskOpen}
