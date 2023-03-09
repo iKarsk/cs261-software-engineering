@@ -5,10 +5,11 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 
 import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
+import { ArrowBackIcon} from '@chakra-ui/icons'
 
 import {
     Modal,
@@ -435,8 +436,13 @@ export default function Page({
         <>
         <Flex direction='column' width="100vw" minHeight="100vh" align="center">
             <Navbar />
-            <Box textAlign="center" mt={20}>
-                    <Heading as='h1' size="2xl">{project.name}</Heading>
+            <Box textAlign="center" mt={20} width="100%">
+                    <Flex alignItems="center">
+                        <Button ml={3} position="fixed" colorScheme="teal" onClick={() => router.push("/dashboard")}>< ArrowBackIcon /> &nbsp; Dashboard</Button>
+                        <Spacer />
+                        <Heading as='h1' size="2xl">{project.name}</Heading>
+                        <Spacer />
+                    </Flex>
                     <Flex mt={2} justifyContent="center">
                         <Text as="b">Started: &nbsp;</Text>
                         <Text color="black">{dateStr(project.start_date)}</Text>
