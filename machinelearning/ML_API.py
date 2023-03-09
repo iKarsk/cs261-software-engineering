@@ -35,11 +35,23 @@ def predict():
 
     
     risk_score = GB.predict(test)[0]
+    
+    total = GB.feature_importances_[1]+GB.feature_importances_[2]+GB.feature_importances_[3]
+    ratios = [GB.feature_importances_[1],GB.feature_importances_[2],GB.feature_importances_[3]]
+    compare = [(ratios[i]/total)*test.iat[0,i+1] for i in range(len(ratios))]
+    
+    recommendation = ""
+
+    if compare.index(max(compare)) == 0:
+        recommendation = "Reduce affecting number of modules"
+    elif compare.index(max(compare)) == 1:
+        recommendation = "Reduce fixing duration"
+    else:
+        recommendation = "Reduce fixing cost"
 
     response = {
         'risk_score': float(risk_score),
-        'n1': float(GB.score(X_train, y_train)),
-        'n2': float(GB.score(X_test, y_test)),
+        "recommendation" : recommendation,
     }
     return jsonify(response)
 
