@@ -5,11 +5,15 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 
 import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
 import { ArrowBackIcon} from '@chakra-ui/icons'
+
+
+import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
+
 
 import {
     Modal,
@@ -184,7 +188,7 @@ export default function Page({
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
                         const json = await response.json();
                         setProject(json);
-                        //console.log(json);	
+                        // console.log(json);	
 
                         const taskJson = await taskRes.json();
                         setAllTasks(taskJson);
@@ -195,8 +199,8 @@ export default function Page({
                         //console.log(devJson);
 
                         const moraleJson = await moraleResponse.json();
-                        console.log("Morale object:")
-                        console.log(moraleJson);
+                        // console.log("Morale object:")
+                        // console.log(moraleJson);
                         setAllMorales(moraleJson);
 
                         setNeedMorale(!json.morale);
@@ -333,6 +337,14 @@ export default function Page({
         return d.toDateString();
     }
 
+    const getProgress = () => {
+        var start = new Date(project.start_date).valueOf();
+        var end = new Date(project.deadline).valueOf();
+        var today = new Date().valueOf();
+
+        return(Math.round(((today - start) / (end - start)) * 100));
+    }
+
 
     const handleNewTask = async () => {
 	
@@ -433,12 +445,14 @@ export default function Page({
 
     if (status === "authenticated" && loaded){
     return(
+        
         <>
+        
         <Flex direction='column' width="100vw" minHeight="100vh" align="center">
             <Navbar />
             <Box textAlign="center" mt={20} width="100%">
                     <Flex alignItems="center">
-                        <Button ml={3} position="fixed" colorScheme="teal" onClick={() => router.push("/dashboard")}>< ArrowBackIcon /> &nbsp; Dashboard</Button>
+                        <Button ml={3} position="fixed" colorScheme="teal" onClick={() => router.push("/dashboard")}>< ArrowBackIcon /></Button>
                         <Spacer />
                         <Heading as='h1' size="2xl">{project.name}</Heading>
                         <Spacer />
@@ -447,7 +461,6 @@ export default function Page({
                         <Text as="b">Started: &nbsp;</Text>
                         <Text color="black">{dateStr(project.start_date)}</Text>
                     </Flex>
-                    
                 </Box>
             <List spacing={3}>
             {allTasks.map((e, i) => (
@@ -460,16 +473,10 @@ export default function Page({
             <Button onClick={handleShowTeam} mt={5}>Show Team Members</Button>
             <Button onClick={onEditOpen} mt={5}>Edit Project</Button>
             <Box borderRadius={4} mt={2}>
-                <Stat>
-                    <StatLabel>Team Morale</StatLabel>
-                    <StatNumber>{allMorales.AvgDayMorale}<Text as="sub" color="grey">/6</Text></StatNumber>
-                    <StatHelpText>
-                        <StatArrow type={allMorales.AvgDayMorale >= allMorales.AvgWeekMorale ? 'increase' : 'decrease'} />
-                        {(Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100).toFixed(2)}%
-                    </StatHelpText>
-                </Stat>
 
-                <Slider value={allMorales.AvgWeekMorale} min={0} max={6} step={1} aria-label='Week Morale'>
+                <Progress mb={5} hasStripe size='sm' value={Math.round((((new Date().valueOf()) - new Date(project.start_date).valueOf()) / ((new Date(project.deadline).valueOf()) - (new Date(project.start_date).valueOf()))) * 100)} />
+
+                <Slider value={allMorales.AvgWeekMorale} min={0} max={6} step={1} mb={10} aria-label='Week Morale'>
                             <SliderMark value={0} {...labelStyles}>
                                 < FaRegFlushed />
                             </SliderMark>
@@ -488,10 +495,145 @@ export default function Page({
                                 
                             </Slider>
             </Box>
-
-
         </div>) : "Not manager" }
+
+        <Tabs variant='enclosed' width="100%">
+            <TabList>
+                <Tab>Overview</Tab>
+                <Tab>Team</Tab>
+                <Tab>Tasks</Tab>
+            </TabList>
+
+            <TabPanels>
+                <TabPanel>
+                <Card width="100%">
+            <CardHeader>
+            <Heading size='md'>Project Team</Heading>
+            </CardHeader>
+            <CardBody>
+                <Stack divider={<StackDivider />} spacing='4'>
+                    <Box>
+                        <Heading size='xs' textTransform='uppercase'>
+                            Team Morale
+                        </Heading>
+                        <Text pt='2' fontSize='sm'>
+                            View a summary of all your clients over the last month.
+                        </Text>
+                    </Box>
+                    <Box>
+                        <Heading size='xs' textTransform='uppercase'>
+                            Overview
+                        </Heading>
+                        <Text pt='2' fontSize='sm'>
+                            Check out the overview of your clients.
+                        </Text>
+                    </Box>
+                    <Box>
+                        <Heading size='xs' textTransform='uppercase'>
+                            Analysis
+                        </Heading>
+                        <Text pt='2' fontSize='sm'>
+                            See a detailed analysis of all your business clients.
+                        </Text>
+                    </Box>
+                </Stack>
+            </CardBody>
+        </Card>
+                </TabPanel>
+                <TabPanel>
+                <Card>
+            <CardHeader>
+            <Heading size='md'> Customer dashboard</Heading>
+            </CardHeader>
+            <CardBody>
+            <Text>View a summary of all your customers over the last month.</Text>
+            </CardBody>
+            <CardFooter>
+            <Button>View here</Button>
+            </CardFooter>
+        </Card>
+                </TabPanel>
+                <TabPanel>
+                <Card>
+            <CardHeader>
+            <Heading size='md'> Customer dashboard</Heading>
+            </CardHeader>
+            <CardBody>
+            <Text>View a summary of all your customers over the last month.</Text>
+            </CardBody>
+            <CardFooter>
+            <Button>View here</Button>
+            </CardFooter>
+        </Card>
+                </TabPanel>
+            </TabPanels>
+        </Tabs>
+
+        {/* <SimpleGrid spacing={4} templateColumns='repeat(auto-fill, minmax(100vw, 100fr))'>
+        <Card>
+            <CardHeader>
+            <Heading size='md'>Project Team</Heading>
+            </CardHeader>
+            <CardBody>
+                <Stack divider={<StackDivider />} spacing='4'>
+                    <Box>
+                        <Heading size='xs' textTransform='uppercase'>
+                            Team Morale
+                        </Heading>
+                        <Text pt='2' fontSize='sm'>
+                            View a summary of all your clients over the last month.
+                        </Text>
+                    </Box>
+                    <Box>
+                        <Heading size='xs' textTransform='uppercase'>
+                            Overview
+                        </Heading>
+                        <Text pt='2' fontSize='sm'>
+                            Check out the overview of your clients.
+                        </Text>
+                    </Box>
+                    <Box>
+                        <Heading size='xs' textTransform='uppercase'>
+                            Analysis
+                        </Heading>
+                        <Text pt='2' fontSize='sm'>
+                            See a detailed analysis of all your business clients.
+                        </Text>
+                    </Box>
+                </Stack>
+            </CardBody>
+        </Card>
+
+        <Card>
+            <CardHeader>
+            <Heading size='md'> Customer dashboard</Heading>
+            </CardHeader>
+            <CardBody>
+            <Text>View a summary of all your customers over the last month.</Text>
+            </CardBody>
+            <CardFooter>
+            <Button>View here</Button>
+            </CardFooter>
+        </Card>
+        <Card>
+            <CardHeader>
+            <Heading size='md'> Customer dashboard</Heading>
+            </CardHeader>
+            <CardBody>
+            <Text>View a summary of all your customers over the last month.</Text>
+            </CardBody>
+            <CardFooter>
+            <Button>View here</Button>
+            </CardFooter>
+        </Card>
+        </SimpleGrid> */}
         </Flex>
+        
+        
+
+
+        
+
 
 
         <Modal

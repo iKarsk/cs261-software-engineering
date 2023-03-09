@@ -143,6 +143,9 @@ export default function Dashboard() {
 
         const responseJSON = await response.json();
 
+        setInvites(invites.filter(item => item.id !== projectid));
+
+
         if(action){
             setTestChange(!testChange);
         }
@@ -202,7 +205,7 @@ export default function Dashboard() {
                                         respondInvite(e.id, true);
                                         console.log("Accept");
                                         }}><CheckIcon /></Button>
-                                    <Button key={i + "decline"} onClick={() => respondInvite(e.id, true)}><CloseIcon /></Button>
+                                    <Button key={i + "decline"} onClick={() => respondInvite(e.id, false)}><CloseIcon /></Button>
                                 </Flex>
                             </Flex>
 
