@@ -19,10 +19,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 		})
 
 		// Filter out the ids that already exist in the database
-		const newIds = userArr.filter(id => !existingRecords.find(r => r.u_id === id))
+		const filteredIds = userArr.filter(id => !existingRecords.find(r => r.u_id === id))
 
-
-		const recordsToCreate = userArr.map((id) => {
+		const recordsToCreate = filteredIds.map((id) => {
 			return {
 				task: task,
 				u_id: id,

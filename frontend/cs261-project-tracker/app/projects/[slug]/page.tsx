@@ -512,14 +512,14 @@ export default function Page({
 	    				<CheckboxGroup value={currentTaskUsers}>
 				<Stack spacing={5} direction='column'>
 					    {team.map((e, i) => (
-						    <Checkbox defaultChecked={currentTaskUsers.includes(e.id)} key={i} value={e.id} onChange={handleSelectUserForTask}>{e.forename} {e.surname}</Checkbox>
+						    <Checkbox isDisabled={!project.isManager} defaultChecked={currentTaskUsers.includes(e.id)} key={i} value={e.id} onChange={handleSelectUserForTask}>{e.forename} {e.surname}</Checkbox>
 					    ))}
 	    			</Stack>
 	    				</CheckboxGroup>
 
                         </ModalBody>
                         <ModalFooter>
-                            <Button onClick={() => handleUserTaskAssignment(currentTask)}>Done</Button>
+                            <Button onClick={project.isManager ? handleUserTaskAssignment : onTaskClose}>Done</Button>
                         </ModalFooter>
 
                     </ModalContent>
