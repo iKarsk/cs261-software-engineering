@@ -42,7 +42,7 @@ export type Task = {
 
 export type UserTask = {
 	task: number;
-	u_id: number;
+	userArr: number[];
 }
 
 export type Developer = {

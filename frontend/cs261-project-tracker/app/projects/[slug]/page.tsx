@@ -100,8 +100,8 @@ export default function Page({
     const [taskDescription, setTaskDescription] = useState("");
     const [taskDeadline, setTaskDeadline] = useState("");
     const [allTasks, setAllTasks] = useState<any[]>([]);
-    const [currentTask, setCurrentTask] = useState({name : "", description : "", deadline : ""});
-    const [currentTaskUsers, setCurrentTaskUsers] = useState<any[]>([]);
+    const [currentTask, setCurrentTask] = useState({id : -1, name : "", description : "", deadline : ""});
+    const [currentTaskUsers, setCurrentTaskUsers] = useState<number[]>([]);
 	
 
     const { isOpen: isTaskOpen, onOpen: onTaskOpen, onClose: onTaskClose } = useDisclosure();
@@ -390,8 +390,46 @@ export default function Page({
 
 	console.log(responseJSON);
 	setCurrentTaskUsers(responseJSON.map((a: any) => a.id));
-	
     }
+
+    const handleUserTaskAssignment = async () => {
+	console.log(currentTask);
+	
+        const postData = {
+		task: currentTask.id,
+		userArr: currentTaskUsers
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/assignTaskToUser";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	const responseJSON = await response.json();
+
+	console.log(responseJSON);
+	
+	onTaskClose();
+    }
+
+    const handleSelectUserForTask  = (event:any) => {
+	    let value = Number(event.target.value);
+	    if (currentTaskUsers.includes(value)) {
+		    setCurrentTaskUsers(currentTaskUsers.filter((v) => v !== value));
+	    } else {
+		    setCurrentTaskUsers([...currentTaskUsers, value]);
+	    }		
+    }
+
     if (status === "authenticated" && loaded){
     return(
         <>
@@ -464,17 +502,18 @@ export default function Page({
                         <ModalBody pb={6}>
 	    			{currentTask.description} 
 	    			{currentTask.deadline}
-	    			<br />
 	    			Assign Task
+	    				<CheckboxGroup value={currentTaskUsers}>
 				<Stack spacing={5} direction='column'>
 					    {team.map((e, i) => (
-						    <Checkbox defaultChecked={currentTaskUsers.includes(e.id)} key={i}>{e.forename} {e.surname}</Checkbox>
+						    <Checkbox defaultChecked={currentTaskUsers.includes(e.id)} key={i} value={e.id} onChange={handleSelectUserForTask}>{e.forename} {e.surname}</Checkbox>
 					    ))}
 	    			</Stack>
+	    				</CheckboxGroup>
 
                         </ModalBody>
                         <ModalFooter>
-                            <Button onClick={onTaskClose}>Done</Button>
+                            <Button onClick={() => handleUserTaskAssignment(currentTask)}>Done</Button>
                         </ModalFooter>
 
                     </ModalContent>
