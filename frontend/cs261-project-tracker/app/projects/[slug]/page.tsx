@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text, Flex } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 
 import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
@@ -56,6 +56,7 @@ import {
     StatArrow,
     StatGroup,
   } from '@chakra-ui/react'
+import Navbar from "@/components/Nav";
 
 
 export default function Page({
@@ -377,6 +378,16 @@ export default function Page({
     }
     if (status === "authenticated" && loaded){
     return(
+        <>
+        <Flex direction='column' width="100vw" minHeight="100vh" align="center">
+            <Navbar />
+            <Box textAlign="center" mt={20}>
+                    <Heading as='h1' size="2xl">{project.name}</Heading>
+                    <Text color="black">{project.start_date.substring(0, 10)}</Text>
+                </Box>
+        </Flex>
+        </>
+        /*
         <div className={styles.container}>
                 <h1>Welcome! You are signed in and can access this page.</h1>
                 <h2>{JSON.stringify(data.user, null, 2)}</h2>
@@ -645,6 +656,7 @@ export default function Page({
                     </ModalContent>
 	    </Modal>
             </div>
+            */
     );
     }
 
