@@ -39,7 +39,7 @@ import Loading from "@/components/loading";
 import Link from "next/link";
 
 import { Select, CreatableSelect, AsyncSelect } from "chakra-react-select";
-import { groupedOptions } from "@/data/data";
+import { categories } from "@/data/data";
 
 
 export default function Dashboard() {
@@ -67,6 +67,7 @@ export default function Dashboard() {
         if (status === "unauthenticated") redirect("/login");
 
         if (status === "authenticated") {
+            console.log(categories);
             setProjectsLoading(true);
             const endpoint = "/api/user/getAllProjects";
 
@@ -292,11 +293,12 @@ export default function Dashboard() {
                                 <FormLabel>Project Category</FormLabel>
                                 <Select
         isMulti
-        options={groupedOptions}
+        options={categories}
         placeholder="Select some colors..."
         closeMenuOnSelect={false}
         selectedOptionColor="green"
         hideSelectedOptions={false}
+        onChange={(e) => console.log(e)}
       />
 {/*                                 <Select placeholder="Select Option" onChange={event => setProjectCategory(event.currentTarget.value)}>
                                     <option value="1">Transaction Processing System</option>
