@@ -36,9 +36,7 @@ with open("models/model3attr.txt", "r") as f:
 @app.route('/api/predictFunding', methods=['GET', 'POST'])
 def predictFunding():
 
-    json_dict = json.loads(json_str)
     json_dict = request.get_json()
-
 
     category_df = pd.DataFrame(columns=list(unique_categories))
     category_df.loc[0] = [0] * len(unique_categories)
@@ -51,6 +49,9 @@ def predictFunding():
 
     prediction = model.predict(category_df)
     res = prediction[0]
+
+    if res < 0:
+        res = 0
 
     return jsonify({ 'funding_required' : "{:.2f}".format(res)} )
 
@@ -96,7 +97,6 @@ def predictGain():
             for j in range(1, estimated_duration + 60):
                     df["Estimated duration"][0] = estimated_duration + j
                     trial = model2.predict(df)
-                    print(trial[0], suggest_gains)
                     if trial[0] > suggest_gains:
                         (suggest_size, suggest_duration, suggest_gains) = (i, estimated_duration + j, trial[0])
 

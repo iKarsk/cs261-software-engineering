@@ -118,6 +118,8 @@ export default function Page({
     const [username, setUsername] = useState("");
 
     const [predictFunds, setPredictFunds] = useState({ funding_required : 0 });
+    const [gain, setGain] = useState({ project_gain : 0, suggest_size : 0, suggest_duration : 0, suggest_gains : 0 });
+    const [effort, setEffort] = useState({ effort_required : 0 });
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -248,7 +250,7 @@ export default function Page({
 
     useEffect(() => {
 	    async function fetchData() { 
-		    // Get project details
+		    // Get funding requirement prediction
                     const endpoint = "http://localhost:3001/api/predictFunding";
 		    let data = project.categories.reduce((acc, item) => {
 			    acc[item] = 1;
@@ -265,15 +267,53 @@ export default function Page({
 
                     const response = await fetch(endpoint, options);
 
-		if (response.status === 200) {
-	    		const riskJson = await response.json();
-	   		setPredictFunds(riskJson);
+		    // Get project profitability prediction
+                    const endpointGain = "http://localhost:3001/api/predictGain";
+		    const date1:Date = new Date(project.start_date);
+		    const date2:Date = new Date(project.deadline);
+
+		    const diffInMs: number = Math.abs(date2.getTime() - date1.getTime());
+                    const optionsGain = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+			    body: JSON.stringify({ size_of_it_department : team.length, estimated_duration : diffInMs, categories : project.categories  }),
+                    };
+
+                    const responseGain = await fetch(endpointGain, optionsGain);
+
+		    // Get project effort estimation
+                    const endpointEffort = "http://localhost:3001/api/predictEffort";
+		    
+
+		    const tExp = team.reduce((acc, us) => acc + us.years_experience, 0);
+
+                    const optionsEffort = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+			    body: JSON.stringify({ TeamExp : tExp, ManagerExp : 5, Length : diffInMs }),
+                    };
+
+                    const responseEffort = await fetch(endpointEffort, optionsEffort);
+
+		if (response.status === 200 && responseGain.status === 200 && responseEffort.status === 200) {
+	    		const fundJson = await response.json();
+	   		setPredictFunds(fundJson);
+
+			const gainJson = await responseGain.json();
+			setGain(gainJson);
+
+			const effortJson = await responseEffort.json();
+			setEffort(effortJson);
 		}
     	    }
 
 	    fetchData().catch(console.error);
 
-    }, [project]);
+    }, [loaded]);
 
     const queryUsername = async (username: string) => {
         return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
@@ -683,7 +723,7 @@ export default function Page({
                             Risk Analysis
                         </Heading>
                         <Text pt='2' fontSize='sm'>
-                            Something something risk we need the ML for this. {predictFunds.funding_required}
+                            Something something risk we need the ML for this. {predictFunds.funding_required} {gain.project_gain} {effort.effort_required}
                         </Text>
                     </Box>
                     <Box>
