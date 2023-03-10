@@ -49,6 +49,7 @@ model projects {
   deadline           DateTime             @db.Date
   end_date           DateTime?            @db.Date
   budget             Int
+  categories	     String[]
   risk               Int?
   repository_link    String               @db.VarChar(500)
   morale             morale[]

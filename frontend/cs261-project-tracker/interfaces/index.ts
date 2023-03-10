@@ -18,6 +18,7 @@ export type ProjectInput = {
 	deadline: Date;
 	budget: number;
 	repository_link: string;
+	categories: string[];
 }
 
 export type ProjectEdit = {
