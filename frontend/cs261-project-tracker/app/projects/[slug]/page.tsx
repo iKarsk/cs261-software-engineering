@@ -112,6 +112,20 @@ export default function Page({
     const [currentTaskUsers, setCurrentTaskUsers] = useState<number[]>([]);
 
     const [githubRepos, setGithubRepos] = useState([""]);
+    const [username, setUsername] = useState("");
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            queryUsername(username).then(response => response.json()).then(data => {
+                setGithubRepos([""])
+                for (let i in data) {
+                    setGithubRepos(oldArray => [...oldArray, data[i].name])
+                }
+            })
+        }, 1000)
+
+        return () => clearTimeout(delayDebounceFn)
+    }, [username])
 	
 
     const { isOpen: isTaskOpen, onOpen: onTaskOpen, onClose: onTaskClose } = useDisclosure();
@@ -907,12 +921,7 @@ export default function Page({
                             <Flex>
                             <FormControl mt={4} width="45%">
                                 <FormLabel>Username</FormLabel>
-                                <Input defaultValue={project.repository_link} onChange={event => queryUsername(event.currentTarget.value).then(response => response.json()).then(data => {
-                                    setGithubRepos([""])
-                                    for (let i in data) {
-                                        setGithubRepos(oldArray => [...oldArray, data[i].name])
-                                    }
-                                })}/>
+                                <Input placeholder="Search for user" onChange={(e) => setUsername(e.currentTarget.value)} />
                             </FormControl>
                             <Spacer />
                             <FormControl mt={4} width="45%">
