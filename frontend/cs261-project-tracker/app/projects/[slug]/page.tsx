@@ -557,7 +557,7 @@ export default function Page({
             </Box>
         </div>) : "Not manager" }
 
-        <Tabs variant='enclosed' width="100%">
+        <Tabs variant='enclosed' width="100vw">
             <TabList>
                 <Tab>Overview</Tab>
                 <Tab>Team</Tab>
@@ -566,12 +566,12 @@ export default function Page({
 
             <TabPanels>
                 <TabPanel>
-                <Card>
+                <Card maxWidth="100%">
             <CardHeader>
             <Heading size='md'>Project Details</Heading>
             </CardHeader>
             <CardBody>
-                <Stack divider={<StackDivider />} spacing='4'>
+                <Stack ml={0} mr={0} divider={<StackDivider />} spacing='4'>
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
                             Project Specification
@@ -622,10 +622,10 @@ export default function Page({
                     </Box>
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
-                            Overview
+                            Risk Analysis
                         </Heading>
                         <Text pt='2' fontSize='sm'>
-                            Check out the overview of your clients.
+                            Something something risk we need the ML for this.
                         </Text>
                     </Box>
                     <Box>
@@ -643,14 +643,50 @@ export default function Page({
                 <TabPanel>
                 <Card>
             <CardHeader>
-            <Heading size='md'> Customer dashboard</Heading>
+            <Heading size='md'>Team Overview</Heading>
             </CardHeader>
             <CardBody>
-            <Text>View a summary of all your customers over the last month.</Text>
+            <Heading size='xs' textTransform='uppercase' mb={5}>Daily Team Morale</Heading>
+            <Slider value={allMorales.AvgDayMorale} min={0} max={6} step={1} aria-label='Week Morale' width="clamp(300px, 50%, 500px)" mb={10}>
+                            <SliderMark value={0} {...labelStyles}>
+                                < FaRegFlushed />
+                            </SliderMark>
+
+                            <SliderMark value={3} {...labelStyles}>
+                                < FaRegMeh />
+                            </SliderMark>
+
+                            <SliderMark value={6} {...labelStyles}>
+                                < FaRegGrinBeam />
+                            </SliderMark>
+                                <SliderTrack bg='grey'>
+                                    <Box position="relative" right={10} />
+                                    <SliderFilledTrack bg={allMorales.AvgDayMorale < 3 ? 'tomato' : 'green'} />
+                                </SliderTrack>
+                                
+                            </Slider>
+
+
+            <Stat mb={3}>
+                    <StatNumber>{allMorales.AvgDayMorale}<Text as="sub" color="grey">/6</Text></StatNumber>
+                    <StatHelpText>
+                        <StatArrow type={allMorales.AvgDayMorale >= allMorales.AvgWeekMorale ? 'increase' : 'decrease'} />
+                        {(Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100).toFixed(2)}% from weekly avg.
+                    </StatHelpText>
+                </Stat>
+
+
+
+            <Divider mt={3} mb={3} />
+            <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
+            <List spacing={3}>
+				    {team.map((e, i) => (
+					    <Flex align="center"><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}</Flex>
+				    ))}
+			    </List>
+                
+            {project.isManager && <Button onClick={onInviteOpen} mt={5}>Invite User</Button>}
             </CardBody>
-            <CardFooter>
-            <Button>View here</Button>
-            </CardFooter>
         </Card>
                 </TabPanel>
                 <TabPanel>
@@ -875,6 +911,38 @@ export default function Page({
 
                     </ModalContent>
         </Modal>
+
+        <Modal
+			    isOpen={isInviteOpen}
+			    onClose={onInviteClose}
+			    isCentered
+			>
+			    <ModalOverlay />
+			    <ModalContent>
+				    <ModalHeader>Invite user to project</ModalHeader>
+				    <ModalCloseButton />
+
+                    <ModalBody>
+                        <FormControl>
+                            <FormLabel>User Email</FormLabel>
+                            <Input placeholder="Email" onChange={event => setEmail(event.currentTarget.value)}/>
+                        </FormControl>
+
+
+                        <FormControl mt={4}>
+                            <Checkbox onChange={event => setManager(event.currentTarget.checked)}>Manager</Checkbox>
+                        </FormControl>
+
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme='blue' mr={3} type="submit" onClick={handleInvites}>
+                        Save
+                        </Button>
+                        <Button onClick={onInviteClose}>Cancel</Button>
+                    </ModalFooter>
+
+			    </ModalContent>
+			</Modal>
         
         <Modal
                     isOpen={isEditOpen}
