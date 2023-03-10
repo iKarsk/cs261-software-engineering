@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress, Grid, GridItem, Select } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress, Grid, GridItem } from '@chakra-ui/react'
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Nav";
 import { CheckIcon, CloseIcon } from '@chakra-ui/icons'
@@ -37,6 +37,10 @@ import {
 } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 import Link from "next/link";
+
+import { Select, CreatableSelect, AsyncSelect } from "chakra-react-select";
+import { groupedOptions } from "@/data/data";
+
 
 export default function Dashboard() {
     const router = useRouter();
@@ -286,12 +290,20 @@ export default function Dashboard() {
 
                             <FormControl mt={4} isRequired>
                                 <FormLabel>Project Category</FormLabel>
-                                <Select placeholder="Select Option" onChange={event => setProjectCategory(event.currentTarget.value)}>
+                                <Select
+        isMulti
+        options={groupedOptions}
+        placeholder="Select some colors..."
+        closeMenuOnSelect={false}
+        selectedOptionColor="green"
+        hideSelectedOptions={false}
+      />
+{/*                                 <Select placeholder="Select Option" onChange={event => setProjectCategory(event.currentTarget.value)}>
                                     <option value="1">Transaction Processing System</option>
                                     <option value="2">Management Information System</option>
                                     <option value="3">Enterprise System</option>
                                     <option value="4">Safety Critical System</option>
-                                </Select>
+                                </Select> */}
                             </FormControl>
 
                             <FormControl mt={4} isRequired>
