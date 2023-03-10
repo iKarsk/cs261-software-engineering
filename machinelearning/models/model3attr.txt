@@ -1,5 +1,3 @@
 TeamExp
 ManagerExp
 Length
-Transactions
-Entities

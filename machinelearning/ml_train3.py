@@ -12,7 +12,7 @@ with open('dataset/desharnais.arff') as f:
 
 df = pd.DataFrame(data['data'], columns=[attr[0] for attr in data['attributes']])
 
-df = df[['TeamExp', 'ManagerExp', 'Length', 'Effort', 'Transactions', 'Entities']]
+df = df[['TeamExp', 'ManagerExp', 'Length', 'Effort']]
 
 df = df.dropna()
 
@@ -31,10 +31,12 @@ model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
 
+print(mean_squared_error(y_test, y_pred))
+
 # Save the model to disk
 with open('models/model3.pkl', 'wb') as f:
     pickle.dump(model, f)
 
 with open("models/model3attr.txt", "w") as f:
-    for a in ['TeamExp', 'ManagerExp', 'Length', 'Transactions', 'Entities']:
+    for a in ['TeamExp', 'ManagerExp', 'Length']:
         f.write(str(a) +"\n")

@@ -117,6 +117,8 @@ export default function Page({
     const [githubRepos, setGithubRepos] = useState([""]);
     const [username, setUsername] = useState("");
 
+    const [predictFunds, setPredictFunds] = useState({ funding_required : 0 });
+
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             queryUsername(username).then(response => response.json()).then(data => {
@@ -160,8 +162,8 @@ export default function Page({
 
                     const response = await fetch(endpoint, options);
 
-                    // Get all morale details
 
+                    // Get all morale details
                     const endpointMorale = "/api/project/getMorales";
 
                     const optionsMorale = {
@@ -174,9 +176,6 @@ export default function Page({
 
                     const moraleResponse = await fetch(endpointMorale, optionsMorale);
 
-
-                    
-			
 
 		    // Get all project tasks
 		    const endpointTask = "/api/project/getAllTasks";
@@ -192,20 +191,19 @@ export default function Page({
 		    const taskRes = await fetch(endpointTask, optionsTask);
 
 
-			// Get all project developers
-			const endpointDev="/api/project/getAllDevelopers";
+		    // Get all project developers
+		    const endpointDev="/api/project/getAllDevelopers";
 
-			const optionsDev = {
-			    method: 'POST',
+	 	    const optionsDev = {
+			method: 'POST',
 
-			    headers: {
-				'Content-Type': 'application/json',
-			    },
-			    
-		 	    body: JSON.stringify({project: projectid}),
-			};
+			headers: {
+			    'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({project: projectid}),
+		    };
 
-			const devRes = await fetch(endpointDev, optionsDev);
+		    const devRes = await fetch(endpointDev, optionsDev);
 
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
                         const json = await response.json();
@@ -246,6 +244,36 @@ export default function Page({
         }
 
     }, [status, hasChanged]);
+
+
+    useEffect(() => {
+	    async function fetchData() { 
+		    // Get project details
+                    const endpoint = "http://localhost:3001/api/predictFunding";
+		    let data = project.categories.reduce((acc, item) => {
+			    acc[item] = 1;
+			    return acc;
+		    }, {} as {[key: string]: number});
+
+                    const options = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+			    body: JSON.stringify(data),
+                    };
+
+                    const response = await fetch(endpoint, options);
+
+		if (response.status === 200) {
+	    		const riskJson = await response.json();
+	   		setPredictFunds(riskJson);
+		}
+    	    }
+
+	    fetchData().catch(console.error);
+
+    }, [project]);
 
     const queryUsername = async (username: string) => {
         return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
@@ -288,6 +316,7 @@ export default function Page({
         });
 
     }
+
     const handleShowTeam = async () => {
         onTeamOpen();
 
@@ -654,15 +683,15 @@ export default function Page({
                             Risk Analysis
                         </Heading>
                         <Text pt='2' fontSize='sm'>
-                            Something something risk we need the ML for this.
+                            Something something risk we need the ML for this. {predictFunds.funding_required}
                         </Text>
                     </Box>
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
-                            Analysis
+                            Suggestions
                         </Heading>
                         <Text pt='2' fontSize='sm'>
-                            See a detailed analysis of all your business clients.
+                            Some suggestions!
                         </Text>
                     </Box>
                 </Stack>
