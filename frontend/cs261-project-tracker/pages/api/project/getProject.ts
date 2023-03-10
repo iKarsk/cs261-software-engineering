@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 				
 					const jsonOBJ = JSON.parse(JSON.stringify(project));
 					jsonOBJ.isManager = projectDeveloper.ismanager;
-					jsonOBJ.morale = (morale.length > 0);
+					jsonOBJ.morale = (morale.length > 0) ? morale[0].morale : -1;
 
 
 					res.status(200).json(jsonOBJ);

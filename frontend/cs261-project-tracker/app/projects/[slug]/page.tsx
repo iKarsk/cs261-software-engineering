@@ -228,8 +228,8 @@ export default function Page({
                         // console.log("Morale object:")
                         // console.log(moraleJson);
                         setAllMorales(moraleJson);
-
-                        setNeedMorale(!json.morale);
+                        
+                        setNeedMorale(Number(json.morale) === -1 ? true : false);
                         setLoaded(true);
                         
 			            //console.log(json.morale);
@@ -559,9 +559,9 @@ export default function Page({
                         }                        
                     </Flex>
                     </Flex>
-                    <Slider value={morale} min={0} max={6} step={1} mb={10} aria-label='Your Morale'>
+                    <Slider value={project.morale} min={0} max={6} step={1} mb={10} aria-label='Your Morale'>
                             <SliderMark value={0} {...labelStyles}>
-                                < FaRegFlushed />
+                                < FaRegFlushed color={project.morale === 0 ? 'tomato' : "none"}/>
                             </SliderMark>
 
                             <SliderMark value={3} {...labelStyles}>
@@ -573,7 +573,8 @@ export default function Page({
                             </SliderMark>
                                 <SliderTrack bg='grey'>
                                     <Box position="relative" right={10} />
-                                    <SliderFilledTrack bg={morale < 3 ? 'tomato' : 'green'} />
+                                    <SliderFilledTrack bg={project.morale < 3 ? 'tomato' : 'green'} />
+                                    <SliderThumb boxSize={3} bg={project.morale < 3 ? 'tomato' : 'green'} />
                                 </SliderTrack>
                                 
                             </Slider>
