@@ -63,6 +63,9 @@ import {
   } from '@chakra-ui/react'
 import Navbar from "@/components/Nav";
 
+import { Avatar, AvatarBadge, AvatarGroup } from '@chakra-ui/react';
+
+import { CircularProgress, CircularProgressLabel } from '@chakra-ui/react';
 
 export default function Page({
     params,
@@ -105,7 +108,7 @@ export default function Page({
     const [taskDescription, setTaskDescription] = useState("");
     const [taskDeadline, setTaskDeadline] = useState("");
     const [allTasks, setAllTasks] = useState<any[]>([]);
-    const [currentTask, setCurrentTask] = useState({id : -1, name : "", description : "", deadline : ""});
+    const [currentTask, setCurrentTask] = useState({id : -1, name : "", description : "", start_date : "",  deadline : ""});
     const [currentTaskUsers, setCurrentTaskUsers] = useState<number[]>([]);
 
     const [githubRepos, setGithubRepos] = useState([""]);
@@ -728,19 +731,34 @@ export default function Page({
                     <ModalContent>
                         <ModalHeader>{currentTask.name}</ModalHeader>
                         <ModalCloseButton />
-
-
                         <ModalBody pb={6}>
-	    			{currentTask.description} 
-	    			{currentTask.deadline}
-	    			Assign Task
-	    				<CheckboxGroup value={currentTaskUsers}>
-				<Stack spacing={5} direction='column'>
-					    {team.map((e, i) => (
-						    <Checkbox isDisabled={!project.isManager} defaultChecked={currentTaskUsers.includes(e.id)} key={i} value={e.id} onChange={handleSelectUserForTask}>{e.forename} {e.surname}</Checkbox>
-					    ))}
+	    			<Card>
+	    				<CardBody>
+	    					<Stack pb={3} direction='row'>
+	    			<Center>
+				    {currentTask.description}
+				</Center>
+	    			<Spacer/>
 	    			</Stack>
+	    			<Divider/>
+	            		<Heading py={3} size='sm' textTransform='uppercase'>
+	    				Assign Task
+				</Heading>
+
+	    				<CheckboxGroup value={currentTaskUsers}>
+						<Stack spacing={1} direction='column'>
+						    {team.map((e, i) => (
+							    <Checkbox isDisabled={!project.isManager} defaultChecked={currentTaskUsers.includes(e.id)} key={i} value={e.id} onChange={handleSelectUserForTask}>{e.forename} {e.surname}</Checkbox>
+						    ))}
+						</Stack>
 	    				</CheckboxGroup>
+	    				<AvatarGroup mt={4} size='md' max={2}>
+	    					{team.filter((e, i) => (currentTaskUsers.includes(e.id))).map((e, i) => (
+							<Avatar name={e.forename + " " + e.surname}/>
+						))}
+	    				</AvatarGroup>
+	    				</CardBody>
+	    			</Card>
 
                         </ModalBody>
                         <ModalFooter>
