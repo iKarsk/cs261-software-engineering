@@ -530,6 +530,24 @@ export default function Page({
                         }                        
                     </Flex>
                     </Flex>
+                    <Slider value={morale} min={0} max={6} step={1} mb={10} aria-label='Your Morale'>
+                            <SliderMark value={0} {...labelStyles}>
+                                < FaRegFlushed />
+                            </SliderMark>
+
+                            <SliderMark value={3} {...labelStyles}>
+                                < FaRegMeh />
+                            </SliderMark>
+
+                            <SliderMark value={6} {...labelStyles}>
+                                < FaRegGrinBeam />
+                            </SliderMark>
+                                <SliderTrack bg='grey'>
+                                    <Box position="relative" right={10} />
+                                    <SliderFilledTrack bg={morale < 3 ? 'tomato' : 'green'} />
+                                </SliderTrack>
+                                
+                            </Slider>
                 </Box>
             <List spacing={3}>
             {allTasks.map((e, i) => (
@@ -692,7 +710,7 @@ export default function Page({
             <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
             <List spacing={3}>
 				    {team.map((e, i) => (
-					    <Flex align="center" key={i}><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}</Flex>
+					    <Flex align="center" key={i}><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}{project.isManager && <Text>&nbsp; {e.years_experience} years experience</Text>}</Flex>
 				    ))}
 			    </List>
             <Text mt={3} size="sm">({team.length} total)</Text>
