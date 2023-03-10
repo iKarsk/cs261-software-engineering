@@ -79,7 +79,7 @@ export default function Page({
 
     const router = useRouter();
     const {status, data} = useSession();
-    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""]});
+    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1});
     const [loaded, setLoaded] = useState(false);
 
     const [needMorale, setNeedMorale] = useState(false);
@@ -214,25 +214,23 @@ export default function Page({
                         setRepository(json.repository_link);
                         setCategories(json.categories);
                         
-                        // console.log(json);	
 
                         const taskJson = await taskRes.json();
                         setAllTasks(taskJson);
-                        //console.log(taskJson);
+
 
                         const devJson = await devRes.json();
                         setTeam(devJson);
-                        //console.log(devJson);
+
 
                         const moraleJson = await moraleResponse.json();
-                        // console.log("Morale object:")
-                        // console.log(moraleJson);
+
                         setAllMorales(moraleJson);
                         
                         setNeedMorale(Number(json.morale) === -1 ? true : false);
                         setLoaded(true);
                         
-			            //console.log(json.morale);
+
                     }else{
                         router.push("/dashboard");
                     }
@@ -303,7 +301,7 @@ export default function Page({
 	    const responseJSON = await response.json();
         setHasChanged(!hasChanged);
 
-        console.log(response);
+
 
         onMoraleClose();
         setNeedMorale(false);
@@ -347,7 +345,6 @@ export default function Page({
 
 	const responseJSON = await response.json();
 
-	console.log(responseJSON);
 	
 	if (response.status === 201) {
 		onInviteClose();
@@ -383,7 +380,6 @@ export default function Page({
         categories: categories,
         };
 
-        console.log(postData);
 
         const JSONdata = JSON.stringify(postData);
 
@@ -453,8 +449,8 @@ export default function Page({
         const response = await fetch(endpoint, options);
 
 	const responseJSON = await response.json();
-
-	console.log(responseJSON);
+        
+        setAllTasks(oldArray => [... oldArray, responseJSON]);
 	onTaskFormClose();
 	
     }
@@ -484,12 +480,10 @@ export default function Page({
 
 	const responseJSON = await response.json();
 
-	console.log(responseJSON);
 	setCurrentTaskUsers(responseJSON.map((a: any) => a.id));
     }
 
     const handleUserTaskAssignment = async () => {
-	console.log(currentTask);
 	
         const postData = {
 		task: currentTask.id,
@@ -512,7 +506,6 @@ export default function Page({
 
 	const responseJSON = await response.json();
 
-	console.log(responseJSON);
 	
 	onTaskClose();
     }
@@ -559,7 +552,8 @@ export default function Page({
                         }                        
                     </Flex>
                     </Flex>
-                    <Slider value={project.morale} min={0} max={6} step={1} mb={10} aria-label='Your Morale'>
+                    <Text mt={4} as="b">Your Morale:</Text>
+                    <Slider mt={2} value={project.morale} min={0} max={6} step={1} mb={10} aria-label='Your Morale'>
                             <SliderMark value={0} {...labelStyles}>
                                 < FaRegFlushed color={project.morale === 0 ? 'tomato' : "none"}/>
                             </SliderMark>
@@ -579,36 +573,6 @@ export default function Page({
                                 
                             </Slider>
                 </Box>
-            <List spacing={3}>
-            {allTasks.map((e, i) => (
-                <ListItem key={i}><Button onClick={() => handleShowTask(e)}>{e.name}</Button></ListItem>
-            ))}
-		    </List>
-            {  project.isManager ? (
-        <div>
-            <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>
-            <Box borderRadius={4} mt={2}>
-
-                <Slider value={allMorales.AvgWeekMorale} min={0} max={6} step={1} mb={10} aria-label='Week Morale'>
-                            <SliderMark value={0} {...labelStyles}>
-                                < FaRegFlushed />
-                            </SliderMark>
-
-                            <SliderMark value={3} {...labelStyles}>
-                                < FaRegMeh />
-                            </SliderMark>
-
-                            <SliderMark value={6} {...labelStyles}>
-                                < FaRegGrinBeam />
-                            </SliderMark>
-                                <SliderTrack bg='grey'>
-                                    <Box position="relative" right={10} />
-                                    <SliderFilledTrack bg='tomato' />
-                                </SliderTrack>
-                                
-                            </Slider>
-            </Box>
-        </div>) : "Not manager" }
 
         <Tabs variant='enclosed' width="100vw" zIndex={3}>
             <TabList zIndex={3}>
@@ -705,38 +669,43 @@ export default function Page({
             <Heading size='md'>Team Overview</Heading>
             </CardHeader>
             <CardBody>
-            <Heading size='xs' textTransform='uppercase' mb={5}>Daily Team Morale</Heading>
-            <Slider value={allMorales.AvgDayMorale} min={0} max={6} step={1} aria-label='Week Morale' width="clamp(300px, 50%, 500px)" mb={10}>
-                            <SliderMark value={0} {...labelStyles}>
-                                < FaRegFlushed />
-                            </SliderMark>
-
-                            <SliderMark value={3} {...labelStyles}>
-                                < FaRegMeh />
-                            </SliderMark>
-
-                            <SliderMark value={6} {...labelStyles}>
-                                < FaRegGrinBeam />
-                            </SliderMark>
-                                <SliderTrack bg='grey'>
-                                    <Box position="relative" right={10} />
-                                    <SliderFilledTrack bg={allMorales.AvgDayMorale < 3 ? 'tomato' : 'green'} />
-                                </SliderTrack>
-                                
-                            </Slider>
-
-
-            <Stat mb={3}>
-                    <StatNumber>{allMorales.AvgDayMorale}<Text as="sub" color="grey">/6</Text></StatNumber>
-                    <StatHelpText>
-                        <StatArrow type={allMorales.AvgDayMorale >= allMorales.AvgWeekMorale ? 'increase' : 'decrease'} />
-                        {(Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100).toFixed(2)}% from weekly avg.
-                    </StatHelpText>
-                </Stat>
-
-
-
-            <Divider mt={3} mb={3} />
+                {project.isManager && (
+                    <>
+                    <Heading size='xs' textTransform='uppercase' mb={5}>Daily Team Morale</Heading>
+                    <Slider value={allMorales.AvgDayMorale} min={0} max={6} step={1} aria-label='Week Morale' width="clamp(300px, 50%, 500px)" mb={10}>
+                                    <SliderMark value={0} {...labelStyles}>
+                                        < FaRegFlushed />
+                                    </SliderMark>
+        
+                                    <SliderMark value={3} {...labelStyles}>
+                                        < FaRegMeh />
+                                    </SliderMark>
+        
+                                    <SliderMark value={6} {...labelStyles}>
+                                        < FaRegGrinBeam />
+                                    </SliderMark>
+                                        <SliderTrack bg='grey'>
+                                            <Box position="relative" right={10} />
+                                            <SliderFilledTrack bg={allMorales.AvgDayMorale < 3 ? 'tomato' : 'green'} />
+                                        </SliderTrack>
+                                        
+                                    </Slider>
+        
+        
+                    <Stat mb={3}>
+                            <StatNumber>{allMorales.AvgDayMorale}<Text as="sub" color="grey">/6</Text></StatNumber>
+                            <StatHelpText>
+                                <StatArrow type={allMorales.AvgDayMorale >= allMorales.AvgWeekMorale ? 'increase' : 'decrease'} />
+                                {(Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100).toFixed(2)}% from weekly avg.
+                            </StatHelpText>
+                        </Stat>
+        
+        
+        
+                    <Divider mt={3} mb={3} />
+                    </>
+                )}
+            
             <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
             <List spacing={3}>
 				    {team.map((e, i) => (
@@ -753,13 +722,19 @@ export default function Page({
                 <TabPanel>
                 <Card>
             <CardHeader>
-            <Heading size='md'> Customer dashboard</Heading>
+            <Heading size='md'>Task Overview</Heading>
             </CardHeader>
             <CardBody>
-            <Text>View a summary of all your customers over the last month.</Text>
+            {allTasks.length > 0 ? 
+            <List spacing={3}>
+            {allTasks.map((e, i) => (
+                <ListItem key={i}><Button onClick={() => handleShowTask(e)}>{e.name}</Button></ListItem>
+            ))}
+		    </List> : "No tasks yet!"}
+
             </CardBody>
             <CardFooter>
-            <Button>View here</Button>
+            {project.isManager && <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>}
             </CardFooter>
         </Card>
                 </TabPanel>

@@ -49,7 +49,7 @@ export default function Dashboard() {
     const { isOpen: isProjectOpen, onOpen: onProjectOpen, onClose: onProjectClose } = useDisclosure();
     
     const [loading, setLoading] = useState(false);
-    const [invites, setInvites] = useState([]);
+    const [invites, setInvites] = useState<any[]>([]);
     
     const [projects, setProjects] = useState<any[]>([]);
     const [projectsLoading, setProjectsLoading] = useState(false);
