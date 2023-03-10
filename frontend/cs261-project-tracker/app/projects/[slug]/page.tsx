@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 
 import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
@@ -107,6 +107,8 @@ export default function Page({
     const [allTasks, setAllTasks] = useState<any[]>([]);
     const [currentTask, setCurrentTask] = useState({id : -1, name : "", description : "", deadline : ""});
     const [currentTaskUsers, setCurrentTaskUsers] = useState<number[]>([]);
+
+    const [githubRepos, setGithubRepos] = useState([""]);
 	
 
     const { isOpen: isTaskOpen, onOpen: onTaskOpen, onClose: onTaskClose } = useDisclosure();
@@ -224,6 +226,9 @@ export default function Page({
 
     }, [status, hasChanged]);
 
+    const queryUsername = async (username: string) => {
+        return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
+    }
 
     const submitMorale = async () => {
         const postData = {
@@ -881,6 +886,24 @@ export default function Page({
                                 <FormLabel>Repository Link</FormLabel>
                                 <Input defaultValue={project.repository_link} onChange={event => setRepository(event.currentTarget.value)}/>
                             </FormControl>
+                            <Flex>
+                            <FormControl mt={4} width="45%">
+                                <FormLabel>Username</FormLabel>
+                                <Input defaultValue={project.repository_link} onChange={event => queryUsername(event.currentTarget.value).then(response => response.json()).then(data => {
+                                    setGithubRepos([""])
+                                    for (let i in data) {
+                                        setGithubRepos(oldArray => [...oldArray, data[i].name])
+                                    }
+                                })}/>
+                            </FormControl>
+                            <Spacer />
+                            <FormControl mt={4} width="45%">
+                                <FormLabel>Repository</FormLabel>
+                                <Select placeholder="Select repository">
+                                    {githubRepos.map((e, i) => ( <option key={i} value={e}>{e}</option> ))}
+                                </Select>
+                            </FormControl>
+                            </Flex>
 
                         </ModalBody>
                         <ModalFooter>
