@@ -14,6 +14,8 @@ import { ArrowBackIcon, ExternalLinkIcon} from '@chakra-ui/icons'
 
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 
+import { Select as ReactSelect } from "chakra-react-select";
+import { categories as categoryList } from "@/data/data";
 
 import {
     Modal,
@@ -77,7 +79,7 @@ export default function Page({
 
     const router = useRouter();
     const {status, data} = useSession();
-    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : ""});
+    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""]});
     const [loaded, setLoaded] = useState(false);
 
     const [needMorale, setNeedMorale] = useState(false);
@@ -101,6 +103,7 @@ export default function Page({
     const [deadline, setDeadline] = useState("");
     const [budget, setBudget] = useState(0);
     const [repository, setRepository] = useState("");
+    const [categories, setCategories] = useState([""]);
 
 
     const { isOpen: isTaskFormOpen, onOpen: onTaskFormOpen, onClose: onTaskFormClose } = useDisclosure();
@@ -211,6 +214,7 @@ export default function Page({
                         setDeadline(json.deadline);
                         setBudget(json.budget);
                         setRepository(json.repository_link);
+                        setCategories(json.categories);
                         
                         // console.log(json);	
 
@@ -333,6 +337,7 @@ export default function Page({
         setDeadline(project.deadline);
         setBudget(project.budget);
         setRepository(project.repository_link);
+        setCategories(project.categories);
 
         onEditClose();
       }
@@ -345,7 +350,8 @@ export default function Page({
 	    name: projectName,
 	    deadline: deadline,
 	    budget: budget,
-	    repository_link: repository
+	    repository_link: repository,
+        categories: categories,
         };
 
         console.log(postData);
@@ -372,6 +378,7 @@ export default function Page({
             deadline: deadline,
             budget: budget,
             repository_link: repository,
+            categories: categories,
         }));
 
         onEditClose();
@@ -583,7 +590,7 @@ export default function Page({
                         <Flex align="end">
                         <Text pt='2' as='b' fontSize='sm'>Project Category: &nbsp; </Text>
                         <Text pt='2' fontSize='sm'>
-                            {project.budget}
+                            {project.categories.join(', ')}
                         </Text>
                         </Flex>
                         <Flex align="end">
@@ -685,7 +692,7 @@ export default function Page({
             <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
             <List spacing={3}>
 				    {team.map((e, i) => (
-					    <Flex align="center"><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}</Flex>
+					    <Flex align="center" key={i}><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}</Flex>
 				    ))}
 			    </List>
             <Text mt={3} size="sm">({team.length} total)</Text>
@@ -965,6 +972,22 @@ export default function Page({
                             <FormControl mt={4}>
                                 <FormLabel>Project Name</FormLabel>
                                 <Input defaultValue={project.name} onChange={event => setProjectName(event.currentTarget.value)}/>
+                            </FormControl>
+
+                            <FormControl mt={4} >
+                                <FormLabel>Project Category</FormLabel>
+                                <ReactSelect
+        isMulti
+        options={categoryList}
+        placeholder="Select some colors..."
+        closeMenuOnSelect={false}
+        selectedOptionColor="green"
+        hideSelectedOptions={false}
+        defaultValue={project.categories.map((e) => ({value: e, label: e}))}
+        onChange={(e) => {setCategories(e.map((e2) => e2.value))
+        }}
+      />
+
                             </FormControl>
 
                             <FormControl mt={4}>

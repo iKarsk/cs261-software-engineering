@@ -27,6 +27,7 @@ export type ProjectEdit = {
 	deadline: Date;
 	budget: number;
 	repository_link: string;
+	categories: string[];
 }
 
 export type Task = {
