@@ -33,7 +33,7 @@ with open("models/model3attr.txt", "r") as f:
     model3_attributes.append(line.strip())
 
 # Make a prediction for how much funding is needed for successful project given project categories
-@app.route('/predictFunding', methods=['GET', 'POST'])
+@app.route('/api/predictFunding', methods=['GET', 'POST'])
 def predictFunding():
     json_str = '''
     {
@@ -46,7 +46,7 @@ def predictFunding():
     '''
 
     json_dict = json.loads(json_str)
-    # json_dict = request.get_json()
+    json_dict = request.get_json()
 
 
     category_df = pd.DataFrame(columns=list(unique_categories))
@@ -64,8 +64,10 @@ def predictFunding():
 
 
 # Make a prediction for project financial gain (or loss)
-@app.route('/predictGain', methods=['GET', 'POST'])
+@app.route('/api/predictGain', methods=['GET', 'POST'])
 def predictGain():
+    linked = {"Banking systems" : ["Banking"], "ERP" : ["Enterprise Resource Planning"], "Mobile applications": ["Mobile Analytics", "Mobile Payments", "Mobile Security", "Mobile Search", "Mobile Enterprise", "Mobile Software Tools", "Mobile Health", "Mobile Coupons", "Mobile Social", "Mobile Games", "Mobile Commerce", "Mobile Video", "Mobile Devices", "Mobile", "Mobile Advertising", "Social + Mobile + Local", "Mobile Shopping", "Mobile Infrastructure", "Mobile Emergency&Health", "iOS", "Android"], "Financial and managerial" : ["Financial Services", "Financial Exchanges", "Finance Technology", "Finance", "Personal Finance", "Digital Rights Management", "Knowledge Management", "Property Management", "Lead Management", "Web Presence Management", "Vulnerability Management", "Risk Management", "Project Management", "Energy Management", "Cloud Management", "Fleet Management", "Wealth Management", "Event Management", "Waste Management", "Supply Chain Management", "Career Management", "Identity Management", "IT Management", "Document Management", "Contact Management", "Task Management", "Social Media Management", "Investment Management", "Innovation Management", "Intellectual Asset Management"], "Web applications" : ["Web CMS", "Web Presence Management", "Curated Web", "Web Browsers", "WebOS", "Web Design", "Semantic Web", "Web Tools", "Web Hosting", "Web Development"],"Bespoke applications" : []}
+
     # json_dict = request.get_json()
 
     df = pd.DataFrame(columns=model2_attributes)
@@ -78,7 +80,13 @@ def predictGain():
 
     """
     for attr, val in json_dict.items():
-        df[attr] = val
+        if attr not in ["Estimated duration", "Size of IT department"]:
+            for main, secondary in linked.items(): 
+                if attr in secondary:
+                    df[main][0] = 1
+
+            else:
+                df[attr][0] = val
     """
 
     prediction = model2.predict(df)
@@ -104,7 +112,7 @@ def predictGain():
     return jsonify({ 'project_gain' : res, 'suggest_size' : int(suggest_size), 'suggest_duration' : int(suggest_duration), 'suggest_gains' : suggest_gains })
 
 
-@app.route('/predictEffort', methods=['GET', 'POST'])
+@app.route('/api/predictEffort', methods=['GET', 'POST'])
 def predictEffort():
     # json_dict = request.get_json()
 
@@ -114,13 +122,11 @@ def predictEffort():
     df["TeamExp"][0] = 20
     df["ManagerExp"][0] = 4
     df["Length"][0] = 12
-    df["Transactions"][0] = 500
-    df["Entities"][0] = 150
 
 
     """
     for attr, val in json_dict.items():
-        df[attr] = val
+        df[attr][0] = val
     """
 
     prediction = model3.predict(df)
