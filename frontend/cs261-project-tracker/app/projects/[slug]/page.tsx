@@ -5,11 +5,11 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 
 import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
-import { ArrowBackIcon} from '@chakra-ui/icons'
+import { ArrowBackIcon, ExternalLinkIcon} from '@chakra-ui/icons'
 
 
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
@@ -188,6 +188,11 @@ export default function Page({
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
                         const json = await response.json();
                         setProject(json);
+                        setProjectName(json.name);
+                        setDeadline(json.deadline);
+                        setBudget(json.budget);
+                        setRepository(json.repository_link);
+                        
                         // console.log(json);	
 
                         const taskJson = await taskRes.json();
@@ -301,6 +306,15 @@ export default function Page({
         fontSize: '2xl',
       }
 
+      const resetEdit = () => {
+        setProjectName(project.name);
+        setDeadline(project.deadline);
+        setBudget(project.budget);
+        setRepository(project.repository_link);
+
+        onEditClose();
+      }
+
 
     const handleEdit = async () => {
 	
@@ -311,6 +325,8 @@ export default function Page({
 	    budget: budget,
 	    repository_link: repository
         };
+
+        console.log(postData);
 
         const JSONdata = JSON.stringify(postData);
 
@@ -326,9 +342,18 @@ export default function Page({
         };
         const response = await fetch(endpoint, options);
 
-	const responseJSON = await response.json();
+	    const responseJSON = await response.json();
 
-	console.log(responseJSON);
+        setProject(prevState => ({
+            ...prevState,
+            name: projectName,
+            deadline: deadline,
+            budget: budget,
+            repository_link: repository,
+        }));
+
+        onEditClose();
+
 	
     }
 
@@ -448,18 +473,33 @@ export default function Page({
         
         <>
         
-        <Flex direction='column' width="100vw" minHeight="100vh" align="center">
+        <Flex direction='column' maxWidth="100vw" minHeight="100vh" align="center">
             <Navbar />
-            <Box textAlign="center" mt={20} width="100%">
-                    <Flex alignItems="center">
-                        <Button ml={3} position="fixed" colorScheme="teal" onClick={() => router.push("/dashboard")}>< ArrowBackIcon /></Button>
-                        <Spacer />
+            <Box textAlign="center" mt={20} maxWidth="100vw">
+                    <Flex alignItems="center" justifyContent="center">
+                        <Button ml={3} position="fixed" left="0" colorScheme="teal" onClick={() => router.push("/dashboard")}>< ArrowBackIcon /></Button>
                         <Heading as='h1' size="2xl">{project.name}</Heading>
-                        <Spacer />
                     </Flex>
                     <Flex mt={2} justifyContent="center">
                         <Text as="b">Started: &nbsp;</Text>
                         <Text color="black">{dateStr(project.start_date)}</Text>
+                    </Flex>
+                    <Flex justifyContent="center">
+                        <Text as="b">Deadline: &nbsp;</Text>
+                        <Text color="black">{dateStr(project.deadline)}</Text>
+                    </Flex>
+                    <Flex justifyContent="center" direction="column" mt={2}>
+                        <Text as="b">Progress:</Text>
+                    <Progress mb={1} mt={1} hasStripe size='sm' value={Math.round((((new Date().valueOf()) - new Date(project.start_date).valueOf()) / ((new Date(project.deadline).valueOf()) - (new Date(project.start_date).valueOf()))) * 100)} />
+                    <Flex justifyContent="center" mb={2}>
+                        {
+                            (new Date() > new Date(project.deadline)) ? <Text as="b" color="red">Deadline passed by {Math.floor((new Date().valueOf() - new Date(project.deadline).valueOf()) / (1000 * 3600 * 24))} days</Text> : 
+                            <>
+                                <Text as="b">Days Left: &nbsp;</Text>
+                                <Text color="black">{Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24))}</Text>
+                            </>
+                        }                        
+                    </Flex>
                     </Flex>
                 </Box>
             <List spacing={3}>
@@ -473,8 +513,6 @@ export default function Page({
             <Button onClick={handleShowTeam} mt={5}>Show Team Members</Button>
             <Button onClick={onEditOpen} mt={5}>Edit Project</Button>
             <Box borderRadius={4} mt={2}>
-
-                <Progress mb={5} hasStripe size='sm' value={Math.round((((new Date().valueOf()) - new Date(project.start_date).valueOf()) / ((new Date(project.deadline).valueOf()) - (new Date(project.start_date).valueOf()))) * 100)} />
 
                 <Slider value={allMorales.AvgWeekMorale} min={0} max={6} step={1} mb={10} aria-label='Week Morale'>
                             <SliderMark value={0} {...labelStyles}>
@@ -506,19 +544,59 @@ export default function Page({
 
             <TabPanels>
                 <TabPanel>
-                <Card width="100%">
+                <Card>
             <CardHeader>
-            <Heading size='md'>Project Team</Heading>
+            <Heading size='md'>Project Details</Heading>
             </CardHeader>
             <CardBody>
                 <Stack divider={<StackDivider />} spacing='4'>
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
-                            Team Morale
+                            Project Specification
                         </Heading>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Project Name: &nbsp; </Text>
                         <Text pt='2' fontSize='sm'>
-                            View a summary of all your clients over the last month.
+                            {project.name}
                         </Text>
+                        </Flex>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Project Category: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {project.budget}
+                        </Text>
+                        </Flex>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Budget: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            £{project.budget}
+                        </Text>
+                        </Flex>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Start Date: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {new Date(project.start_date).toDateString()}
+                        </Text>
+                        </Flex>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Deadline: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {new Date(project.deadline).toDateString()}
+                        </Text>
+                        </Flex>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Days Left: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {new Date() > new Date(project.deadline) ? "Deadline passed" : Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24))}
+                        </Text>
+                        </Flex>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Codebase: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {project.repository_link ? <Link href={project.repository_link} isExternal>Link <ExternalLinkIcon mx='2px' /></Link> : <Text as='i'>None</Text>}
+                        </Text>
+                        </Flex>
+                        { project.isManager && <Button onClick={onEditOpen} mt={4}>Edit Project</Button>}
                     </Box>
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
@@ -763,7 +841,7 @@ export default function Page({
         
         <Modal
                     isOpen={isEditOpen}
-                    onClose={onEditClose}
+                    onClose={resetEdit}
                     isCentered
                 >
                     <ModalOverlay />
@@ -780,7 +858,7 @@ export default function Page({
 
                             <FormControl mt={4}>
                                 <FormLabel>Deadline</FormLabel>
-                                <Input defaultValue={project.deadline.substring(0,10)} type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
+                                <Input defaultValue={new Date(project.deadline).toISOString().substring(0,10)} type="date" onChange={event => setDeadline(event.currentTarget.value)}/>
                             </FormControl>
 
                             <FormControl mt={4}>
@@ -809,7 +887,7 @@ export default function Page({
                             <Button colorScheme='blue' mr={3} type="submit" onClick={handleEdit}>
                                 Save
                             </Button>
-                            <Button onClick={onEditClose}>Cancel</Button>
+                            <Button onClick={resetEdit}>Cancel</Button>
                         </ModalFooter>
 
                     </ModalContent>
