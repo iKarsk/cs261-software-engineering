@@ -499,7 +499,7 @@ export default function Page({
             <Navbar />
             <Box textAlign="center" mt={20} maxWidth="100vw">
                     <Flex alignItems="center" justifyContent="center">
-                        <Button ml={3} position="fixed" left="0" colorScheme="teal" onClick={() => router.push("/dashboard")}>< ArrowBackIcon /></Button>
+                        <Button ml={3} position="fixed" left="0" colorScheme="teal" zIndex={2} onClick={() => router.push("/dashboard")}>< ArrowBackIcon /></Button>
                         <Heading as='h1' size="2xl">{project.name}</Heading>
                     </Flex>
                     <Flex mt={2} justifyContent="center">
@@ -532,8 +532,6 @@ export default function Page({
             {  project.isManager ? (
         <div>
             <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>
-            <Button onClick={handleShowTeam} mt={5}>Show Team Members</Button>
-            <Button onClick={onEditOpen} mt={5}>Edit Project</Button>
             <Box borderRadius={4} mt={2}>
 
                 <Slider value={allMorales.AvgWeekMorale} min={0} max={6} step={1} mb={10} aria-label='Week Morale'>
@@ -557,15 +555,15 @@ export default function Page({
             </Box>
         </div>) : "Not manager" }
 
-        <Tabs variant='enclosed' width="100vw">
-            <TabList>
-                <Tab>Overview</Tab>
+        <Tabs variant='enclosed' width="100vw" zIndex={3}>
+            <TabList zIndex={3}>
+                <Tab bg="white" zIndex={3}>Overview</Tab>
                 <Tab>Team</Tab>
                 <Tab>Tasks</Tab>
             </TabList>
 
-            <TabPanels>
-                <TabPanel>
+            <TabPanels zIndex={3}>
+                <TabPanel bg="white" zIndex={3}>
                 <Card maxWidth="100%">
             <CardHeader>
             <Heading size='md'>Project Details</Heading>
@@ -592,6 +590,12 @@ export default function Page({
                         <Text pt='2' as='b' fontSize='sm'>Budget: &nbsp; </Text>
                         <Text pt='2' fontSize='sm'>
                             £{project.budget}
+                        </Text>
+                        </Flex>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Team Size: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {team.length}
                         </Text>
                         </Flex>
                         <Flex align="end">
@@ -684,6 +688,8 @@ export default function Page({
 					    <Flex align="center"><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}</Flex>
 				    ))}
 			    </List>
+            <Text mt={3} size="sm">({team.length} total)</Text>
+
                 
             {project.isManager && <Button onClick={onInviteOpen} mt={5}>Invite User</Button>}
             </CardBody>
@@ -1021,7 +1027,7 @@ export default function Page({
                         <ModalHeader>Morale Check-in</ModalHeader>
 
                         <ModalBody pb={6}>
-                            <Slider defaultValue={3} min={0} max={6} step={1} aria-label='morale slider' onChangeEnd={(val) => setMorale(val)}>
+                            <Slider defaultValue={3} min={0} max={6} step={1} aria-label='morale slider' onChange={(val) => setMorale(val)}>
                             <SliderMark value={0} {...labelStyles}>
                                 < FaRegFlushed />
                             </SliderMark>
@@ -1033,11 +1039,11 @@ export default function Page({
                             <SliderMark value={6} {...labelStyles}>
                                 < FaRegGrinBeam />
                             </SliderMark>
-                                <SliderTrack bg='teal'>
+                                <SliderTrack bg='grey'>
                                     <Box position="relative" right={10} />
-                                    <SliderFilledTrack bg='tomato' />
+                                    <SliderFilledTrack bg={morale < 3 ? 'tomato' : 'green'} />
                                 </SliderTrack>
-                                <SliderThumb boxSize={3} bg="tomato" />
+                                <SliderThumb boxSize={3} bg="orange" />
                             </Slider>
 
                         </ModalBody>
