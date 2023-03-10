@@ -38,8 +38,8 @@ import {
 import Loading from "@/components/loading";
 import Link from "next/link";
 
-import { Select, CreatableSelect, AsyncSelect } from "chakra-react-select";
-import { groupedOptions } from "@/data/data";
+import { Select } from "chakra-react-select";
+import { categories } from "@/data/data";
 
 
 export default function Dashboard() {
@@ -62,6 +62,7 @@ export default function Dashboard() {
     const [deadline, setDeadline] = useState("");
     const [budget, setBudget] = useState("");
     const [repository, setRepository] = useState("");
+    const [projectCategories, setProjectCategories] = useState([""]);
 
     useEffect(() => {
         if (status === "unauthenticated") redirect("/login");
@@ -165,7 +166,8 @@ export default function Dashboard() {
 		name: projectName,
 		deadline: new Date(deadline),
 		budget: Number(budget),
-		repository_link: repository
+		repository_link: repository,
+        categories: projectCategories,
         };
 
         const JSONdata = JSON.stringify(postData);
@@ -207,7 +209,6 @@ export default function Dashboard() {
                                 <Flex gap={1}>
                                     <Button key={i + "accept"} onClick={() => {
                                         respondInvite(e.id, true);
-                                        console.log("Accept");
                                         }}><CheckIcon /></Button>
                                     <Button key={i + "decline"} onClick={() => respondInvite(e.id, false)}><CloseIcon /></Button>
                                 </Flex>
@@ -292,11 +293,13 @@ export default function Dashboard() {
                                 <FormLabel>Project Category</FormLabel>
                                 <Select
         isMulti
-        options={groupedOptions}
+        options={categories}
         placeholder="Select some colors..."
         closeMenuOnSelect={false}
         selectedOptionColor="green"
         hideSelectedOptions={false}
+        onChange={(e) => {setProjectCategories(e.map((e2) => e2.value))
+        }}
       />
 {/*                                 <Select placeholder="Select Option" onChange={event => setProjectCategory(event.currentTarget.value)}>
                                     <option value="1">Transaction Processing System</option>

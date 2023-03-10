@@ -35,15 +35,6 @@ with open("models/model3attr.txt", "r") as f:
 # Make a prediction for how much funding is needed for successful project given project categories
 @app.route('/api/predictFunding', methods=['GET', 'POST'])
 def predictFunding():
-    json_str = '''
-    {
-        "Software": 0,
-        "Distribution": 0,
-        "Application Platforms": 1,
-        "Real Time": 1,
-        "Social Network Media": 1
-    }
-    '''
 
     json_dict = json.loads(json_str)
     json_dict = request.get_json()
@@ -54,7 +45,8 @@ def predictFunding():
 
 
     for category, val in json_dict.items():
-        category_df[category] = val
+        if category in unique_categories:
+            category_df[category] = val
 
 
     prediction = model.predict(category_df)

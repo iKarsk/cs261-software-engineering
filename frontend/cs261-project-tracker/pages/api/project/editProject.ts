@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 	switch (req.method) {
 		case 'POST':
-			const { project, name, deadline, budget, repository_link } = 
+			const { project, name, deadline, budget, repository_link, categories } = 
 				req.body as ProjectEdit;
 
 			try {
@@ -20,6 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 						deadline: new Date(deadline),
 						budget: Number(budget),
 						repository_link: repository_link,
+						categories: categories,
 					},
 				});
 
