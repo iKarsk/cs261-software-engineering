@@ -3,7 +3,7 @@ import { Box, Divider, Button, Flex, Spacer, Heading, Text} from '@chakra-ui/rea
 import { signOut } from "next-auth/react"
 import { Avatar } from '@chakra-ui/react';
 
-export default function Navbar({ name }: { name: string | null | undefined}) {
+export default function Navbar({ name }: { name: any }) {
     return (
         <Box as="header" position="fixed" width="100%" bg="white" zIndex={200}>
             <Flex width="100%" mt={3}>
