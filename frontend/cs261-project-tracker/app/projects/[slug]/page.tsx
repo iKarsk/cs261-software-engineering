@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select, Wrap, WrapItem, Tag, HStack } from '@chakra-ui/react'
+import { Switch, Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select, Wrap, WrapItem, Tag, HStack } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 import WarningMessage from "@/components/WarningMessage";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -129,10 +129,13 @@ export default function Page({
 
     const [githubRepos, setGithubRepos] = useState([""]);
     const [username, setUsername] = useState("");
+    const [repo, setRepo] = useState("");
 
     const [predictFunds, setPredictFunds] = useState({ funding_required : 0 });
     const [gain, setGain] = useState({ project_gain : 0, suggest_size : 0, suggest_duration : 0, suggest_gains : 0 });
     const [effort, setEffort] = useState({ effort_required : 0 });
+
+    const [switchToggle, setSwitchToggle] = useState(false);
 
     const { isOpen: isDeleteProjectOpen, onOpen: onDeleteProjectOpen, onClose: onDeleteProjectClose } = useDisclosure();
     const { isOpen: isAbandonProjectOpen, onOpen: onAbandonProjectOpen, onClose: onAbandonProjectClose } = useDisclosure();
@@ -235,6 +238,8 @@ export default function Page({
                         setBudget(json.budget);
                         setRepository(json.repository_link);
                         setCategories(json.categories);
+                        setSwitchToggle(json.repository_link === "");
+
                         
 
                         const taskJson = await taskRes.json();
@@ -419,13 +424,17 @@ export default function Page({
       }
 
       const resetEdit = () => {
+        onEditClose();
         setProjectName(project.name);
         setDeadline(project.deadline);
         setBudget(project.budget);
         setRepository(project.repository_link);
+        setUsername("");
+        setRepo("");
         setCategories(project.categories);
+        setSwitchToggle(project.repository_link === "");
 
-        onEditClose();
+        
       }
 
 
@@ -436,9 +445,19 @@ export default function Page({
 	    name: projectName,
 	    deadline: deadline,
 	    budget: budget,
-	    repository_link: repository,
+	    repository_link: "",
         categories: categories,
         };
+
+        if(switchToggle){
+            if(username === "" || repo === ""){
+                postData.repository_link = ""
+            } else{
+                postData.repository_link = `https://www.github.com/${username}/${repo}`;
+            }
+        } else{
+            postData.repository_link = repository;
+        }
 
 
         const JSONdata = JSON.stringify(postData);
@@ -462,11 +481,17 @@ export default function Page({
             name: projectName,
             deadline: deadline,
             budget: budget,
-            repository_link: repository,
+            repository_link: postData.repository_link,
             categories: categories,
         }));
 
         onEditClose();
+        setRepository(postData.repository_link);
+        setRepo("");
+        setUsername("");
+        setSwitchToggle(postData.repository_link === "");
+
+        
 
 	
     }
@@ -1250,10 +1275,13 @@ export default function Page({
                                 
                             </FormControl>
 
-                            <FormControl mt={4}>
-                                <FormLabel>Repository Link</FormLabel>
-                                <Input defaultValue={project.repository_link} onChange={event => setRepository(event.currentTarget.value)}/>
+                            <Divider mt={3}/> 
+                            <FormControl mt={4} display='flex' alignItems='center'>
+                                <FormLabel mb='0'>GitHub Repository?</FormLabel>
+                                <Switch onChange={() => setSwitchToggle(!switchToggle)} defaultChecked={switchToggle} colorScheme="green" sx={{ 'span.chakra-switch__track:not([data-checked])': { backgroundColor: 'tomato' } }}/>
                             </FormControl>
+
+                            {switchToggle ? 
                             <Flex>
                             <FormControl mt={4} width="45%">
                                 <FormLabel>Username</FormLabel>
@@ -1262,12 +1290,16 @@ export default function Page({
                             <Spacer />
                             <FormControl mt={4} width="45%">
                                 <FormLabel>Repository</FormLabel>
-                                <Select placeholder="Select repository">
+                                <Select placeholder="Select repository" onChange={(e) => setRepo(e.currentTarget.value)}>
                                     {githubRepos.map((e, i) => ( <option key={i} value={e}>{e}</option> ))}
                                 </Select>
                             </FormControl>
-                            </Flex>
-
+                            </Flex> :
+                         <FormControl mt={4}>
+                            <FormLabel>Repository Link</FormLabel>
+                            <Input defaultValue={project.repository_link} onChange={event => setRepository(event.currentTarget.value)}/>
+                         </FormControl>   
+                            }
                         </ModalBody>
                         <ModalFooter>
                             <Button colorScheme='blue' mr={3} type="submit" onClick={handleEdit}>
