@@ -102,6 +102,9 @@ export default function Page({
     const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0, end_date: ""});
     const [loaded, setLoaded] = useState(false);
 
+    const [width, setWidth] = useState<number>(window.innerWidth);
+
+
     const [needMorale, setNeedMorale] = useState(false);
     const [morale, setMorale] = useState(0);
     const { isOpen: isMoraleOpen, onOpen: onMoraleOpen, onClose: onMoraleClose } = useDisclosure();
@@ -164,6 +167,16 @@ export default function Page({
         return () => clearTimeout(delayDebounceFn)
     }, [username])
 	
+    function handleWindowSizeChange() {
+        setWidth(window.innerWidth);
+    }
+
+    useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+        window.removeEventListener('resize', handleWindowSizeChange);
+    }
+}, []);
 
     const { isOpen: isTaskOpen, onOpen: onTaskOpen, onClose: onTaskClose } = useDisclosure();
 
@@ -733,8 +746,8 @@ export default function Page({
         <Tabs variant='enclosed' width="100vw" zIndex={3}>
             <TabList zIndex={3}>
                 <Tab bg="white" zIndex={3}>Overview</Tab>
-                <Tab>Team</Tab>
-                <Tab>Tasks</Tab>
+                <Tab bg="white" zIndex={3}>Team</Tab>
+                <Tab bg="white" zIndex={3}>Tasks</Tab>
                 {project.isManager && <Tab>Manage</Tab>}
             </TabList>
 
@@ -842,7 +855,7 @@ export default function Page({
             </CardBody>
         </Card>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel bg="white" zIndex={3}>
                 <Card>
             <CardHeader>
             <Heading size='md'>Team Overview</Heading>
@@ -912,7 +925,46 @@ export default function Page({
             <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
             <List spacing={3}>
 				    {team.map((e, i) => (
-					    <Flex align="center" key={i}><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}{project.isManager && <Text>&nbsp; {e.years_experience} years experience</Text>}</Flex>
+					    <Flex align="center" key={i}>
+                            <Avatar name={e.forename + " " + e.surname} mr={3}/>
+                            <ListItem key={i}>
+                                {e.forename} {e.surname}
+                            </ListItem>
+                            {e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}
+                            {project.isManager && <Text ml={5}>{e.years_experience} years experience</Text>}
+                            {project.isManager && (e.morale !== null ? 
+                            (
+                                <>
+                                {width >= 500 &&
+                                <Slider value={e.morale} ml={10} min={0} max={6} step={1} aria-label={e.forename + "'s morale"} width="clamp(200px, 50%, 400px)" mb={10}>
+                                <SliderMark value={0} {...labelStyles}>
+                                    < FaRegFlushed />
+                                </SliderMark>
+    
+                                <SliderMark value={3} {...labelStyles}>
+                                    < FaRegMeh />
+                                </SliderMark>
+    
+                                <SliderMark value={6} {...labelStyles}>
+                                    < FaRegGrinBeam />
+                                </SliderMark>
+                                    <SliderTrack bg='grey'>
+                                        <Box position="relative" right={10} />
+                                        <SliderFilledTrack bg={e.morale < 3 ? 'tomato' : 'green'} />
+                                    </SliderTrack>
+                                    
+                                </Slider>}
+                                <Stat ml={8}>
+                                    <StatNumber>{e.morale}<Text as="sub" color="grey">/6</Text></StatNumber>
+                                    <StatHelpText>
+                                        <StatArrow type={e.morale >= e.yesterdaysMorale ? 'increase' : 'decrease'} />
+                                        {Math.abs(e.morale - e.yesterdaysMorale)} {e.morale >= e.yesterdaysMorale ? 'up' : "down"} from yesterday.
+                                    </StatHelpText>
+                                </Stat>
+                                </>
+                            ) 
+                            : <Text ml={10} as="b" color="tomato">Hasn't submitted morale yet</Text>)}
+                        </Flex>
 				    ))}
 			    </List>
             <Text mt={3} size="sm">({team.length} total)</Text>
@@ -922,7 +974,7 @@ export default function Page({
             </CardBody>
         </Card>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel bg="white" zIndex={3}>
                 <Card>
             <CardHeader>
             <Heading size='md'>Task Overview</Heading>
@@ -941,7 +993,7 @@ export default function Page({
             </CardFooter>
         </Card>
                 </TabPanel>
-                {project.isManager && <TabPanel>
+                {project.isManager && <TabPanel bg="white" zIndex={3}>
                     <Card>
             <CardHeader>
             <Heading size='md'>Manage Project</Heading>
