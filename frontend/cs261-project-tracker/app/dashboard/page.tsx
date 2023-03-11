@@ -227,7 +227,7 @@ export default function Dashboard() {
 
             <>
             <Flex direction='column' width="100vw" minHeight="100vh" align="center">
-                <Navbar />
+                <Navbar name={data?.user.name}/>
                 <Box textAlign="center" mt={20}>
                     <Heading as='h1' size="2xl">Dashboard</Heading>
                     <Heading as='h2' size='md' mt={2}>Welcome, {data?.user?.name?.slice(0, data.user.name?.lastIndexOf(" "))}!</Heading>

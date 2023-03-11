@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select, Wrap, WrapItem } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 import WarningMessage from "@/components/WarningMessage";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -41,6 +41,15 @@ InputLeftElement
 } from '@chakra-ui/react'
 
 import {
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
+  } from '@chakra-ui/react'
+
+import {
   List,
   ListItem,
   ListIcon,
@@ -71,6 +80,7 @@ import Navbar from "@/components/Nav";
 import { Avatar, AvatarBadge, AvatarGroup } from '@chakra-ui/react';
 
 import { CircularProgress, CircularProgressLabel } from '@chakra-ui/react';
+import React from "react";
 
 export default function Page({
     params,
@@ -123,6 +133,13 @@ export default function Page({
     const [predictFunds, setPredictFunds] = useState({ funding_required : 0 });
     const [gain, setGain] = useState({ project_gain : 0, suggest_size : 0, suggest_duration : 0, suggest_gains : 0 });
     const [effort, setEffort] = useState({ effort_required : 0 });
+
+    const { isOpen: isDeleteProjectOpen, onOpen: onDeleteProjectOpen, onClose: onDeleteProjectClose } = useDisclosure();
+    const { isOpen: isAbandonProjectOpen, onOpen: onAbandonProjectOpen, onClose: onAbandonProjectClose } = useDisclosure();
+    const { isOpen: isCompleteProjectOpen, onOpen: onCompleteProjectOpen, onClose: onCompleteProjectClose } = useDisclosure();
+
+    const [manageProjectConfirmation, setManageProjectConfirmation] = useState("");
+    const cancelRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -568,7 +585,7 @@ export default function Page({
         <>
         
         <Flex direction='column' maxWidth="100vw" minHeight="100vh" align="center">
-            <Navbar />
+            <Navbar name={data?.user.name}/>
             <Box textAlign="center" mt={20} maxWidth="100vw">
                     <Flex alignItems="center" justifyContent="center">
                         <Button ml={3} position="fixed" left="0" colorScheme="teal" zIndex={2} onClick={() => router.push("/dashboard")}>< ArrowBackIcon /></Button>
@@ -622,6 +639,7 @@ export default function Page({
                 <Tab bg="white" zIndex={3}>Overview</Tab>
                 <Tab>Team</Tab>
                 <Tab>Tasks</Tab>
+                {project.isManager && <Tab>Manage</Tab>}
             </TabList>
 
             <TabPanels zIndex={3}>
@@ -784,6 +802,26 @@ export default function Page({
             </CardFooter>
         </Card>
                 </TabPanel>
+                {project.isManager && <TabPanel>
+                    <Card>
+            <CardHeader>
+            <Heading size='md'>Manage Project</Heading>
+            </CardHeader>
+            <CardBody>
+                <Wrap>
+                    <WrapItem>
+                        <Button colorScheme="orange" onClick={onDeleteProjectOpen}>Delete Project</Button>
+                    </WrapItem>
+                    <WrapItem>
+                        <Button colorScheme="red" onClick={onAbandonProjectOpen}>Abandon project</Button>
+                    </WrapItem>
+                    <WrapItem>
+                        <Button colorScheme="green" onClick={onCompleteProjectOpen}>Complete project</Button>
+                    </WrapItem>
+                </Wrap>
+            </CardBody>
+        </Card>
+                    </TabPanel>}
             </TabPanels>
         </Tabs>
 
@@ -847,12 +885,113 @@ export default function Page({
         </SimpleGrid> */}
         </Flex>
         
+            {project.isManager && 
+            <>
+            <AlertDialog
+            isOpen={isDeleteProjectOpen}
+            leastDestructiveRef={cancelRef}
+            isCentered
+            onClose={() => {
+                setManageProjectConfirmation("");
+                onDeleteProjectClose();}}
+          >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                            Delete Project
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            Are you sure? You can't undo this action afterwards.
+                            Please type <Text as="b">delete {project.name}</Text> to confirm.
+                            <Input mt={2} placeholder={`delete ${project.name}`} onChange={(e) => setManageProjectConfirmation(e.target.value)}/>
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={() => {
+                                setManageProjectConfirmation("");
+                                onDeleteProjectClose();}}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme='red' onClick={onDeleteProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("delete " + project.name)}>
+                                Delete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+          </AlertDialog>
+
+          <AlertDialog
+            isOpen={isAbandonProjectOpen}
+            leastDestructiveRef={cancelRef}
+            isCentered
+            onClose={() => {
+                setManageProjectConfirmation("");
+                onAbandonProjectClose();}}
+          >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                            Abandon Project
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            Are you sure? You can't undo this action afterwards.
+                            Please type <Text as="b">abandon {project.name}</Text> to confirm.
+                            <Input mt={2} placeholder={`abandon ${project.name}`} onChange={(e) => setManageProjectConfirmation(e.target.value)}/>
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={() => {
+                                setManageProjectConfirmation("");
+                                onAbandonProjectClose();}}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme='red' onClick={onAbandonProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("abandon " + project.name)}>
+                                Abandon
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+          </AlertDialog>
+
+
+            <AlertDialog
+            isOpen={isCompleteProjectOpen}
+            leastDestructiveRef={cancelRef}
+            isCentered
+            onClose={() => {
+                setManageProjectConfirmation("");
+                onCompleteProjectClose();}}
+          >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                            Complete Project
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            Are you sure? You can't undo this action afterwards.
+                            Please type <Text as="b">complete {project.name}</Text> to confirm.
+                            <Input mt={2} placeholder={`complete ${project.name}`} onChange={(e) => setManageProjectConfirmation(e.target.value)}/>
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={() => {
+                                setManageProjectConfirmation("");
+                                onCompleteProjectClose();}}>
+                                Complete
+                            </Button>
+                            <Button colorScheme='green' onClick={onCompleteProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("complete " + project.name)}>
+                                Complete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+          </AlertDialog>
+          </>
+          }
         
-
-
-        
-
-
 
         <Modal
                     isOpen={isTaskOpen}
