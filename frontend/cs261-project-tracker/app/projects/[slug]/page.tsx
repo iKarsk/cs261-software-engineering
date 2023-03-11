@@ -483,6 +483,30 @@ export default function Page({
 
         return(Math.round(((today - start) / (end - start)) * 100));
     }
+    
+    const handleDeleteProject = async () => {
+
+        const postData = {
+            projectid: project.id,
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/deleteProject";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	    const responseJSON = await response.json();
+        router.push("/dashboard");
+    }
 
 
     const handleNewTask = async () => {
@@ -920,7 +944,7 @@ export default function Page({
                                 onDeleteProjectClose();}}>
                                 Cancel
                             </Button>
-                            <Button colorScheme='red' onClick={onDeleteProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("delete " + project.name)}>
+                            <Button colorScheme='red' onClick={handleDeleteProject} ml={3} isDisabled={manageProjectConfirmation !== ("delete " + project.name)}>
                                 Delete
                             </Button>
                         </AlertDialogFooter>
