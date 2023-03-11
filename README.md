@@ -1,6 +1,6 @@
 # CS261 Software Engineering Group Project
 
-
+![Alt text](/ProjectTracker.png?raw=true "Project Tracker Homepage")
 ## How to run
 
 ### Docker compose
