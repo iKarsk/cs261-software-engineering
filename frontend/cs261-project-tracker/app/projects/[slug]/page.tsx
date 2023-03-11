@@ -41,6 +41,13 @@ InputLeftElement
 } from '@chakra-ui/react'
 
 import {
+    Alert,
+    AlertIcon,
+    AlertTitle,
+    AlertDescription,
+  } from '@chakra-ui/react'
+
+import {
     AlertDialog,
     AlertDialogBody,
     AlertDialogFooter,
@@ -92,14 +99,14 @@ export default function Page({
 
     const router = useRouter();
     const {status, data} = useSession();
-    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0});
+    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0, end_date: ""});
     const [loaded, setLoaded] = useState(false);
 
     const [needMorale, setNeedMorale] = useState(false);
     const [morale, setMorale] = useState(0);
     const { isOpen: isMoraleOpen, onOpen: onMoraleOpen, onClose: onMoraleClose } = useDisclosure();
 
-    const [allMorales, setAllMorales] = useState({AvgDayMorale: 0, AvgWeekMorale: 0, DayMorale: []});
+    const [allMorales, setAllMorales] = useState({AvgDayMorale: 0, AvgWeekMorale: 0, AvgMorale: 0, DayMorale: []});
 
     const [team, setTeam] = useState<any[]>([]);
     const { isOpen: isTeamOpen, onOpen: onTeamOpen, onClose: onTeamClose } = useDisclosure();
@@ -189,7 +196,7 @@ export default function Page({
 
 
                     // Get all morale details
-                    const endpointMorale = "/api/project/getMorales";
+                    const endpointMorale = project.status === 0 ? "/api/project/getMorales" : "/api/project/getAllProjectMorales";
 
                     const optionsMorale = {
                         method: 'POST',
@@ -253,8 +260,10 @@ export default function Page({
                         const moraleJson = await moraleResponse.json();
 
                         setAllMorales(moraleJson);
+                        if(project.status === 0){
+                            setNeedMorale(Number(json.morale) === -1 ? true : false);
+                        }
                         
-                        setNeedMorale(Number(json.morale) === -1 ? true : false);
                         setLoaded(true);
                         
 
@@ -673,6 +682,8 @@ export default function Page({
                         <Text as="b">Deadline: &nbsp;</Text>
                         <Text color="black">{dateStr(project.deadline)}</Text>
                     </Flex>
+                    {project.status === 0 ?
+                    <>
                     <Flex justifyContent="center" direction="column" mt={2}>
                         <Text as="b">Progress:</Text>
                     <Progress mb={1} mt={1} hasStripe size='sm' value={Math.round((((new Date().valueOf()) - new Date(project.start_date).valueOf()) / ((new Date(project.deadline).valueOf()) - (new Date(project.start_date).valueOf()))) * 100)} />
@@ -706,6 +717,17 @@ export default function Page({
                                 </SliderTrack>
                                 
                             </Slider>
+                            </> : (project.status === -1) ? 
+                            <Alert status="error" borderRadius="lg" mt={3} mb={3}>
+                                <AlertIcon />
+                                <AlertTitle>Project abandoned</AlertTitle>
+                                <AlertDescription>You may view the archive</AlertDescription>
+                            </Alert> : 
+                            <Alert status="success" borderRadius="lg" mt={3} mb={3}>
+                            <AlertIcon />
+                            <AlertTitle>Project completed!</AlertTitle>
+                            <AlertDescription>You may view the archive</AlertDescription>
+                        </Alert>}
                 </Box>
 
         <Tabs variant='enclosed' width="100vw" zIndex={3}>
@@ -768,19 +790,31 @@ export default function Page({
                             {new Date(project.deadline).toDateString()}
                         </Text>
                         </Flex>
+                        {project.status === 0 ? <>
                         <Flex align="end">
                         <Text pt='2' as='b' fontSize='sm'>Days Left: &nbsp; </Text>
                         <Text pt='2' fontSize='sm'>
                             {new Date() > new Date(project.deadline) ? "Deadline passed" : Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24))}
                         </Text>
                         </Flex>
+                        </> :
+                        <>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Project closed on: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {new Date(project.end_date).toDateString()}
+                        </Text>
+                        </Flex>
+                        </>
+                        }
+
                         <Flex align="end">
                         <Text pt='2' as='b' fontSize='sm'>Codebase: &nbsp; </Text>
                         <Text pt='2' fontSize='sm'>
                             {project.repository_link ? <Link href={project.repository_link} isExternal>Link <ExternalLinkIcon mx='2px' /></Link> : <Text as='i'>None</Text>}
                         </Text>
                         </Flex>
-                        { project.isManager && <Button onClick={onEditOpen} mt={4}>Edit Project</Button>}
+                        { project.status === 0 && (project.isManager && <Button onClick={onEditOpen} mt={4}>Edit Project</Button>)}
                     </Box>
                     {project.isManager &&
 
@@ -814,7 +848,7 @@ export default function Page({
             <Heading size='md'>Team Overview</Heading>
             </CardHeader>
             <CardBody>
-                {project.isManager && (
+                {project.status === 0 ? (project.isManager && (
                     <>
                     <Heading size='xs' textTransform='uppercase' mb={5}>Daily Team Morale</Heading>
                     <Slider value={allMorales.AvgDayMorale} min={0} max={6} step={1} aria-label='Week Morale' width="clamp(300px, 50%, 500px)" mb={10}>
@@ -844,12 +878,33 @@ export default function Page({
                                 {(Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100).toFixed(2)}% from weekly avg.
                             </StatHelpText>
                         </Stat>
+                    
+                    </>
+                )) : (
+                    <>
+                    <Heading size='xs' textTransform='uppercase' mb={5}>Average Morale for Project Duration</Heading>
+                    <Slider value={allMorales.AvgMorale} min={0} max={6} step={1} aria-label='Morale for Entire Project' width="clamp(300px, 50%, 500px)" mb={10}>
+                                    <SliderMark value={0} {...labelStyles}>
+                                        < FaRegFlushed />
+                                    </SliderMark>
         
+                                    <SliderMark value={3} {...labelStyles}>
+                                        < FaRegMeh />
+                                    </SliderMark>
         
-        
-                    <Divider mt={3} mb={3} />
+                                    <SliderMark value={6} {...labelStyles}>
+                                        < FaRegGrinBeam />
+                                    </SliderMark>
+                                        <SliderTrack bg='grey'>
+                                            <Box position="relative" right={10} />
+                                            <SliderFilledTrack bg={allMorales.AvgMorale < 3 ? 'tomato' : 'green'} />
+                                        </SliderTrack>
+                                        
+                                    </Slider>
+                    
                     </>
                 )}
+                <Divider mt={3} mb={3} />
             
             <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
             <List spacing={3}>
@@ -860,7 +915,7 @@ export default function Page({
             <Text mt={3} size="sm">({team.length} total)</Text>
 
                 
-            {project.isManager && <Button onClick={onInviteOpen} mt={5}>Invite User</Button>}
+            {project.status === 0 && (project.isManager && <Button onClick={onInviteOpen} mt={5}>Invite User</Button>)}
             </CardBody>
         </Card>
                 </TabPanel>
@@ -879,7 +934,7 @@ export default function Page({
 
             </CardBody>
             <CardFooter>
-            {project.isManager && <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>}
+            {project.status === 0 && (project.isManager && <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>)}
             </CardFooter>
         </Card>
                 </TabPanel>
@@ -893,12 +948,14 @@ export default function Page({
                     <WrapItem>
                         <Button colorScheme="orange" onClick={onDeleteProjectOpen}>Delete Project</Button>
                     </WrapItem>
+                    {project.status === 0 && <>
                     <WrapItem>
                         <Button colorScheme="red" onClick={onAbandonProjectOpen}>Abandon project</Button>
                     </WrapItem>
                     <WrapItem>
                         <Button colorScheme="green" onClick={onCompleteProjectOpen}>Complete project</Button>
                     </WrapItem>
+                    </>}
                 </Wrap>
             </CardBody>
         </Card>
