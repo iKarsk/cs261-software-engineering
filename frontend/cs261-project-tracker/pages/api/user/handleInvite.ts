@@ -43,13 +43,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 						});
 
 						res.status(200).json(project);
+					}else{
+						res.status(204).end();
 					}
 
-					res.status(204).end();
+					
+				}else{
+					res.status(404).send("Invite not found");
 				}
 
 
-				res.status(404).send("Invite not found");
 			} catch (error) {
 				
 				console.error(error);

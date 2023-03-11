@@ -168,8 +168,6 @@ export default function Dashboard() {
         };
         const response = await fetch(endpoint, options);
 
-        const responseJSON = await response.json();
-
         setInvites(invites.filter(item => item.id !== projectid));
 
 
