@@ -704,6 +704,8 @@ export default function Page({
                         </Flex>
                         { project.isManager && <Button onClick={onEditOpen} mt={4}>Edit Project</Button>}
                     </Box>
+                    {project.isManager &&
+
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
                             Risk Analysis
@@ -715,6 +717,7 @@ export default function Page({
                             Something something risk we need the ML for this. {predictFunds.funding_required} {gain.project_gain} {effort.effort_required}
                         </Text>
                     </Box>
+                    }
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
                             Suggestions
