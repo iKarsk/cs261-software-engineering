@@ -237,19 +237,39 @@ export default function Dashboard() {
                     <Button onClick={onProjectOpen} mt={5}>Create new Project</Button>
                 </Flex>
                 <Flex mt={6} direction="column">
-                    <Heading as="h2" size="md">All projects</Heading>
+                    <Heading as="h2" size="md">Current projects</Heading>
                     <Divider />
                     
                 </Flex>
                 <Box w="clamp(300px, 40%, 400px)" h='fit' mt={5} display='flex' justifyContent='center' alignItems='center'>
                     {projectsLoading ? <CircularProgress size='2rem' isIndeterminate color='green.300' /> : projects.length == 0 ? "You have no projects" :
 			    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
-				    {projects.map((e, i) => (
+				    {projects.filter((proj) => proj.end_date === null).map((e, i) => (
 					    <ListItem key={i}><Button onClick={() => router.push("/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id)}>{e.name}</Button></ListItem>
 				    ))}
 			    </List>
 		    }
                 </Box>
+                {projects.filter((proj) => proj.end_date !== null).length > 0 && 
+                <>
+                <Flex mt={6} direction="column">
+                    <Heading as="h2" size="md">Past projects</Heading>
+                    <Divider />
+                    
+                </Flex>
+                <Box w="clamp(300px, 40%, 400px)" h='fit' mt={5} display='flex' justifyContent='center' alignItems='center'>
+                    {projectsLoading ? <CircularProgress size='2rem' isIndeterminate color='green.300' /> : projects.length == 0 ? "You have no projects" :
+			    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
+				    {projects.filter((proj) => proj.end_date !== null).map((e, i) => (
+					    <ListItem key={i}><Button onClick={() => router.push("/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id)}>{e.name}</Button></ListItem>
+				    ))}
+			    </List>
+		    }
+                </Box>
+                </>
+                }
+
+
             </Flex>
 
             <Modal
