@@ -92,7 +92,7 @@ export default function Page({
 
     const router = useRouter();
     const {status, data} = useSession();
-    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1});
+    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0});
     const [loaded, setLoaded] = useState(false);
 
     const [needMorale, setNeedMorale] = useState(false);
@@ -518,6 +518,31 @@ export default function Page({
         const JSONdata = JSON.stringify(postData);
 
         const endpoint="/api/project/deleteProject";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	    const responseJSON = await response.json();
+        router.push("/dashboard");
+    }
+
+    const handleCloseProject = async (status : boolean) => {
+
+        const postData = {
+            projectid: project.id,
+            status: status,
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/closeProject";
 
         const options = {
             method: 'POST',
@@ -1003,7 +1028,7 @@ export default function Page({
                                 onAbandonProjectClose();}}>
                                 Cancel
                             </Button>
-                            <Button colorScheme='red' onClick={onAbandonProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("abandon " + project.name)}>
+                            <Button colorScheme='red' onClick={() => handleCloseProject(false)} ml={3} isDisabled={manageProjectConfirmation !== ("abandon " + project.name)}>
                                 Abandon
                             </Button>
                         </AlertDialogFooter>
@@ -1038,7 +1063,7 @@ export default function Page({
                                 onCompleteProjectClose();}}>
                                 Complete
                             </Button>
-                            <Button colorScheme='green' onClick={onCompleteProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("complete " + project.name)}>
+                            <Button colorScheme='green' onClick={() => handleCloseProject(true)} ml={3} isDisabled={manageProjectConfirmation !== ("complete " + project.name)}>
                                 Complete
                             </Button>
                         </AlertDialogFooter>

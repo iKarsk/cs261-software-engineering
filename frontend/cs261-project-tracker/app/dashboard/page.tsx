@@ -261,7 +261,7 @@ export default function Dashboard() {
                     {projectsLoading ? <CircularProgress size='2rem' isIndeterminate color='green.300' /> : projects.length == 0 ? "You have no projects" :
 			    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
 				    {projects.filter((proj) => proj.end_date !== null).map((e, i) => (
-					    <ListItem key={i}><Button onClick={() => router.push("/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id)}>{e.name}</Button></ListItem>
+					    <ListItem key={i}><Button colorScheme={e.status === 1 ? 'green' : 'red'} onClick={() => router.push("/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id)}>{e.name}</Button></ListItem>
 				    ))}
 			    </List>
 		    }
