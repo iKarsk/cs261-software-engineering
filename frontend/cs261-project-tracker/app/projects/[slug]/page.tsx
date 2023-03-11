@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import styles from './page.module.css'
 import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select } from '@chakra-ui/react'
 import Loading from "@/components/loading";
+import WarningMessage from "@/components/WarningMessage";
+import ErrorMessage from "@/components/ErrorMessage";
+
 
 import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
 import { ArrowBackIcon, ExternalLinkIcon} from '@chakra-ui/icons'
@@ -688,6 +691,9 @@ export default function Page({
                             Risk Analysis
                         </Heading>
                         <Text pt='2' fontSize='sm'>
+                            {allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3 && <ErrorMessage message="Team morale is consistently low. Consistently low morale will lead to dramatically reduced productivity." />}
+                            {allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3 && <WarningMessage message="Team morale is low, but improving. Keep an eye on the team." />}
+                            {allMorales.AvgDayMorale < 3 && allMorales.AvgWeekMorale >= 3 && <WarningMessage message="Your team's morale is low. This may affect the project's progress." />}
                             Something something risk we need the ML for this. {predictFunds.funding_required} {gain.project_gain} {effort.effort_required}
                         </Text>
                     </Box>
