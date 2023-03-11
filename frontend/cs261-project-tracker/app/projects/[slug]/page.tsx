@@ -720,13 +720,13 @@ export default function Page({
                             </> : (project.status === -1) ? 
                             <Alert status="error" borderRadius="lg" mt={3} mb={3}>
                                 <AlertIcon />
-                                <AlertTitle>Project abandoned</AlertTitle>
-                                <AlertDescription>You may view the archive</AlertDescription>
+                                <AlertTitle>Project abandoned.</AlertTitle>
+                                <AlertDescription>You may view its archive</AlertDescription>
                             </Alert> : 
                             <Alert status="success" borderRadius="lg" mt={3} mb={3}>
                             <AlertIcon />
                             <AlertTitle>Project completed!</AlertTitle>
-                            <AlertDescription>You may view the archive</AlertDescription>
+                            <AlertDescription>You may view its archive</AlertDescription>
                         </Alert>}
                 </Box>
 
