@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select, Wrap, WrapItem } from '@chakra-ui/react'
+import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select, Wrap, WrapItem, Tag, HStack } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 import WarningMessage from "@/components/WarningMessage";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -662,9 +662,13 @@ export default function Page({
                         </Flex>
                         <Flex align="end">
                         <Text pt='2' as='b' fontSize='sm'>Project Category: &nbsp; </Text>
-                        <Text pt='2' fontSize='sm'>
-                            {project.categories.join(', ')}
-                        </Text>
+                        <HStack spacing={2}>
+                            {project.categories.map((cat) => (
+                                <Tag colorScheme="teal">
+                                    {cat}
+                                </Tag>
+                            ))}
+                        </HStack>
                         </Flex>
                         <Flex align="end">
                         <Text pt='2' as='b' fontSize='sm'>Budget: &nbsp; </Text>
