@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    hostname: myhost
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cs261
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+  webapp:
+    build:
+      context: ./frontend/cs261-project-tracker
+      dockerfile: Dockerfile
+      target: deploy
+    volumes:
+      - postgres-data:/app/postgres-data
+      - /home/node/app/node_modules
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@myhost:5432/cs261
+    ports:
+      - 3000:3000
+volumes:
+  postgres-data:
