@@ -878,6 +878,8 @@ export default function Page({
                                 {(Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100).toFixed(2)}% from weekly avg.
                             </StatHelpText>
                         </Stat>
+
+                        <Divider mt={3} mb={3} />
                     
                     </>
                 )) : (
@@ -901,10 +903,11 @@ export default function Page({
                                         </SliderTrack>
                                         
                                     </Slider>
+
+                                    <Divider mt={3} mb={3} />
                     
                     </>
                 )}
-                <Divider mt={3} mb={3} />
             
             <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
             <List spacing={3}>
