@@ -307,19 +307,6 @@ export default function Page({
                         if(json.status === 0){
                             setNeedMorale(Number(json.morale) === -1 ? true : false);
                         }
-
-                        let tempMoraleRisk = 0;
-
-                        if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale < 3){
-                            tempMoraleRisk += 50;
-                        }else if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale >= 3){
-                            tempMoraleRisk += 25;
-                        } else if(moraleJson.AvgWeekMorale >= 3 && moraleJson.AvgDayMorale < 3){
-                            tempMoraleRisk += 10;
-                        }
-                        setMoraleRisk(tempMoraleRisk);
-
-                        console.log("moraleRisk: " + moraleRisk + "");
                         
                         setLoaded(true);
                         
@@ -410,35 +397,6 @@ export default function Page({
 			const effortJson = await responseEffort.json();
 			setEffort(effortJson);
 
-
-
-
-            let deadlineRisk = 0
-            const suggestedDuration = gainJson.suggested_duration * 30;
-            const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
-            
-            console.log("suggested duration is" + suggestedDuration);
-            console.log("gain min size is " + gainJson.min_size)
-            if(suggestedDuration > daysLeft * 1.5){
-                deadlineRisk += 50;
-            }
-            else if(suggestedDuration >= 1.25 * daysLeft){
-                deadlineRisk += 25;
-            } else if(suggestedDuration >= 1.1 * daysLeft){
-                deadlineRisk += 10;
-            }
-    
-            let teamRisk = 0;
-    
-            if (team.length < gainJson.min_size){
-                teamRisk += 30;
-            };
-
-            setOtherRisk(deadlineRisk + teamRisk);
-
-            console.log("deadline risk is: " + deadlineRisk);
-            console.log("team risk is: " + teamRisk);
-
 		}
     	    }
 
@@ -452,6 +410,53 @@ export default function Page({
 
     const queryUsername = async (username: string) => {
         return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
+    }
+
+    function calculateRiskValue () {
+        let tempMoraleRisk = 0;
+
+        if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3){
+            tempMoraleRisk += 50;
+        }else if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3){
+            tempMoraleRisk += 25;
+        } else if(allMorales.AvgWeekMorale >= 3 && allMorales.AvgDayMorale < 3){
+            tempMoraleRisk += 10;
+        }
+
+
+
+        let deadlineRisk = 0
+        const suggestedDuration = gain.suggested_duration * 30;
+        const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
+        
+        console.log("suggested duration is" + suggestedDuration);
+        console.log("gain min size is " + gain.min_size)
+        if(suggestedDuration > daysLeft * 1.5){
+            deadlineRisk += 50;
+        }
+        else if(suggestedDuration >= 1.25 * daysLeft){
+            deadlineRisk += 25;
+        } else if(suggestedDuration >= 1.1 * daysLeft){
+            deadlineRisk += 10;
+        }
+
+        let teamRisk = 0;
+        
+        if (team.length < gain.min_size){
+            teamRisk += 30;
+        };
+
+
+
+        console.log("deadline risk is: " + deadlineRisk);
+        console.log("team risk is: " + teamRisk);
+
+
+        
+
+        console.log("moraleRisk: " + moraleRisk + "");
+
+        return Number(tempMoraleRisk + deadlineRisk + teamRisk);
     }
 
     const submitMorale = async () => {
@@ -933,7 +938,7 @@ export default function Page({
 			<StatGroup>
 			    	<Stat>
 			    		<StatLabel>Project Risk Level</StatLabel>
-			   		<CircularProgress value={otherRisk + moraleRisk} color="red.500" thickness="16px"/> 
+			   		<CircularProgress value={calculateRiskValue()} color="red.500" thickness="16px"/> 
 			    
 			    	</Stat>
 				<Stat>
