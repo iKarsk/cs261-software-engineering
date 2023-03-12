@@ -39,19 +39,30 @@ def predictFunding():
 
     json_dict = request.get_json()
 
+    """
     category_df = pd.DataFrame(columns=list(unique_categories))
     category_df.loc[0] = [0] * len(unique_categories)
-
 
     for col, val in json_dict.items():
         if (col == "funding_total_usd") or (col in unique_categories):
             category_df[col] = val
 
+    """
+
+    col = ["funding_total_usd"]
+    category_df = pd.DataFrame(columns=list(col))
+    category_df.loc[0] = [0] * len(col)
+
+    for col, val in json_dict.items():
+        if (col == "funding_total_usd"):
+            category_df[col] = val
+
 
     prediction = model.predict(category_df)
+    proba = model.predict_proba(category_df)
     res = prediction[0]
 
-    return jsonify({ 'enough_funding' : int(res) })
+    return jsonify({ 'enough_funding' : int(res), 'probability' : proba[0][1] })
 
 
 # Make a prediction for project financial gain (or loss)

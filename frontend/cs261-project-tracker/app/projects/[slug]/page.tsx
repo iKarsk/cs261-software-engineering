@@ -142,7 +142,7 @@ export default function Page({
     const [repo, setRepo] = useState("");
 
     const [managerExp, setManagerExp] = useState(0);
-    const [predictFunds, setPredictFunds] = useState({ enough_funding : 0 });
+    const [predictFunds, setPredictFunds] = useState({ enough_funding : 0, probability: 0 });
     const [gain, setGain] = useState({ predicted_gain : 0, min_size : 0, suggested_duration : 0, potential_gains : 0, max_size: 0});
     const [effort, setEffort] = useState({ effort_required : 0 });
     const [riskVal, setRiskVal] = useState(50);
@@ -872,6 +872,7 @@ export default function Page({
 			    	<Stat>
 			    		<StatLabel>Sufficient Budget</StatLabel>
 			    		<StatNumber>{ predictFunds.enough_funding == 1 ? "Yes" : "No"}</StatNumber>
+			    		<StatHelpText>{ 100 * predictFunds.probability.toFixed(2) }% confidence</StatHelpText>
 			    	</Stat>
 			</StatGroup>
                     </Box>
