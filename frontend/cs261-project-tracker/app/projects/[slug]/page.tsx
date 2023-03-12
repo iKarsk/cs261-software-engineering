@@ -102,7 +102,7 @@ export default function Page({
     const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0, end_date: ""});
     const [loaded, setLoaded] = useState(false);
 
-    const [width, setWidth] = useState<number>(window.innerWidth);
+    const [width, setWidth] = useState<number>(0);
 
 
     const [needMorale, setNeedMorale] = useState(false);
@@ -172,6 +172,7 @@ export default function Page({
     }
 
     useEffect(() => {
+        setWidth(window.innerWidth);
     window.addEventListener('resize', handleWindowSizeChange);
     return () => {
         window.removeEventListener('resize', handleWindowSizeChange);
