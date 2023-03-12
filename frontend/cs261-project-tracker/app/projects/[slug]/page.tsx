@@ -408,6 +408,8 @@ export default function Page({
 
     useEffect(() => {
         if(loaded && secondLoaded){
+            console.log(secondLoaded);
+            
 
             let moraleRisk = 0
 
@@ -423,7 +425,9 @@ export default function Page({
             let deadlineRisk = 0
             const suggestedDuration = gain.suggested_duration * 30;
             const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
-    
+            
+            console.log("suggested duration is" + suggestedDuration);
+            console.log("gain min size is " + gain.min_size)
             if(suggestedDuration > daysLeft * 1.5){
                 deadlineRisk += 50;
             }
