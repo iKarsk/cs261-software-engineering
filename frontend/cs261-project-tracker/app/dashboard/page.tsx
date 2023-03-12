@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { redirect } from 'next/navigation';
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress, Grid, GridItem } from '@chakra-ui/react'
+import { Select, Divider, Button, Box, useDisclosure, Flex, Heading, Spacer, Container, CircularProgress, Grid, GridItem, Switch } from '@chakra-ui/react'
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Nav";
 import { CheckIcon, CloseIcon } from '@chakra-ui/icons'
@@ -38,7 +38,7 @@ import {
 import Loading from "@/components/loading";
 import Link from "next/link";
 
-import { Select } from "chakra-react-select";
+import { Select as ReactSelect } from "chakra-react-select";
 import { categories } from "@/data/data";
 
 
@@ -63,6 +63,11 @@ export default function Dashboard() {
     const [budget, setBudget] = useState("");
     const [repository, setRepository] = useState("");
     const [projectCategories, setProjectCategories] = useState([""]);
+
+    const [switchToggle, setSwitchToggle] = useState(true);
+    const [username, setUsername] = useState("");
+    const [repo, setRepo] = useState("");
+    const [githubRepos, setGithubRepos] = useState([""]);
 
     useEffect(() => {
         if (status === "unauthenticated") redirect("/login");
@@ -92,6 +97,23 @@ export default function Dashboard() {
 
 
     }, [status, testChange]);
+
+    const queryUsername = async (username: string) => {
+        return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
+    }
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            queryUsername(username).then(response => response.json()).then(data => {
+                setGithubRepos([""])
+                for (let i in data) {
+                    setGithubRepos(oldArray => [...oldArray, data[i].name])
+                }
+            })
+        }, 1000)
+
+        return () => clearTimeout(delayDebounceFn)
+    }, [username])
 
     
     const handleInvites = async () => {
@@ -146,8 +168,6 @@ export default function Dashboard() {
         };
         const response = await fetch(endpoint, options);
 
-        const responseJSON = await response.json();
-
         setInvites(invites.filter(item => item.id !== projectid));
 
 
@@ -166,9 +186,19 @@ export default function Dashboard() {
 		name: projectName,
 		deadline: new Date(deadline),
 		budget: Number(budget),
-		repository_link: repository,
+		repository_link: "",
         categories: projectCategories,
         };
+
+        if(switchToggle){
+            if(username === "" || repo === ""){
+                postData.repository_link = ""
+            } else{
+                postData.repository_link = `https://www.github.com/${username}/${repo}`;
+            }
+        } else{
+            postData.repository_link = repository;
+        }
 
         const JSONdata = JSON.stringify(postData);
 
@@ -237,19 +267,39 @@ export default function Dashboard() {
                     <Button onClick={onProjectOpen} mt={5}>Create new Project</Button>
                 </Flex>
                 <Flex mt={6} direction="column">
-                    <Heading as="h2" size="md">All projects</Heading>
+                    <Heading as="h2" size="md">Current projects</Heading>
                     <Divider />
                     
                 </Flex>
                 <Box w="clamp(300px, 40%, 400px)" h='fit' mt={5} display='flex' justifyContent='center' alignItems='center'>
                     {projectsLoading ? <CircularProgress size='2rem' isIndeterminate color='green.300' /> : projects.length == 0 ? "You have no projects" :
 			    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
-				    {projects.map((e, i) => (
+				    {projects.filter((proj) => proj.end_date === null).map((e, i) => (
 					    <ListItem key={i}><Button onClick={() => router.push("/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id)}>{e.name}</Button></ListItem>
 				    ))}
 			    </List>
 		    }
                 </Box>
+                {projects.filter((proj) => proj.end_date !== null).length > 0 && 
+                <>
+                <Flex mt={6} direction="column">
+                    <Heading as="h2" size="md">Past projects</Heading>
+                    <Divider />
+                    
+                </Flex>
+                <Box w="clamp(300px, 40%, 400px)" h='fit' mt={5} display='flex' justifyContent='center' alignItems='center'>
+                    {projectsLoading ? <CircularProgress size='2rem' isIndeterminate color='green.300' /> : projects.length == 0 ? "You have no projects" :
+			    <List spacing={3} display="flex" flexDirection="column" alignItems="center">
+				    {projects.filter((proj) => proj.end_date !== null).map((e, i) => (
+					    <ListItem key={i}><Button colorScheme={e.status === 1 ? 'green' : 'red'} onClick={() => router.push("/projects/" + e.name.replace(/\s+/g, '-').toLowerCase() + "-" + e.id)}>{e.name}</Button></ListItem>
+				    ))}
+			    </List>
+		    }
+                </Box>
+                </>
+                }
+
+
             </Flex>
 
             <Modal
@@ -291,7 +341,7 @@ export default function Dashboard() {
 
                             <FormControl mt={4} isRequired>
                                 <FormLabel>Project Category</FormLabel>
-                                <Select
+                                <ReactSelect
         isMulti
         options={categories}
         placeholder="Select some colors..."
@@ -329,11 +379,31 @@ export default function Dashboard() {
                                 </InputGroup>
                                 
                             </FormControl>
-
-                            <FormControl mt={4}>
-                                <FormLabel>Repository Link</FormLabel>
-                                <Input placeholder="https://" onChange={event => setRepository(event.currentTarget.value)}/>
+                            <Divider mt={3}/> 
+                            <FormControl mt={4} display='flex' alignItems='center'>
+                                <FormLabel mb='0'>GitHub Repository?</FormLabel>
+                                <Switch onChange={() => setSwitchToggle(!switchToggle)} defaultChecked={switchToggle} colorScheme="green" sx={{ 'span.chakra-switch__track:not([data-checked])': { backgroundColor: 'tomato' } }}/>
                             </FormControl>
+
+                            {switchToggle ? 
+                            <Flex>
+                            <FormControl mt={4} width="45%">
+                                <FormLabel>Username</FormLabel>
+                                <Input placeholder="Search for user" onChange={(e) => setUsername(e.currentTarget.value)} />
+                            </FormControl>
+                            <Spacer />
+                            <FormControl mt={4} width="45%">
+                                <FormLabel>Repository</FormLabel>
+                                <Select placeholder="Select repository" onChange={(e) => setRepo(e.currentTarget.value)}>
+                                    {githubRepos.map((e, i) => ( <option key={i} value={e}>{e}</option> ))}
+                                </Select>
+                            </FormControl>
+                            </Flex> :
+                         <FormControl mt={4}>
+                            <FormLabel>Repository Link</FormLabel>
+                            <Input onChange={event => setRepository(event.currentTarget.value)}/>
+                         </FormControl>   
+                            }
                             </form>
 
                     </ModalBody>

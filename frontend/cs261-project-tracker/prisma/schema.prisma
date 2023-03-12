@@ -48,6 +48,7 @@ model projects {
   start_date         DateTime             @db.Date
   deadline           DateTime             @db.Date
   end_date           DateTime?            @db.Date
+  status             Int                  @default(0)
   budget             Int
   categories	     String[]
   risk               Int?

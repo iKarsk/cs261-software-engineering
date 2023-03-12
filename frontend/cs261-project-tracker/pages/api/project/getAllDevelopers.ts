@@ -28,7 +28,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 					},
 				})
 
-				res.status(200).json(users);
+				const obj = [];
+
+				for(var user in users){
+					const morale = await prisma.morale.findFirst({
+						where :{
+							project: Number(project),
+							u_id: users[user].id,
+							submit_date: new Date(),
+						},
+						select: {
+							morale: true,
+						},
+					});
+
+					const yesterdaysMorale = await prisma.morale.findFirst({
+						where :{
+							project: Number(project),
+							u_id: users[user].id,
+							submit_date: new Date(new Date().setDate(new Date().getDate() - 1)),
+						}
+					})
+
+					if(morale){
+						if(yesterdaysMorale){
+							obj.push({
+								...users[user],
+								morale: morale.morale,
+								yesterdaysMorale: yesterdaysMorale.morale,
+							});		
+						}else{
+							obj.push({
+								...users[user],
+								morale: morale.morale,
+								yesterdaysMorale: null,
+							});
+						}
+					} else{
+						obj.push({
+							...users[user],
+							morale: null
+						});
+					}
+				}
+
+				res.status(200).json(obj);
 			} catch (error) {
 				
 				console.error(error);

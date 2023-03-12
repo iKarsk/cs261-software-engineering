@@ -7,9 +7,7 @@ export default function Navbar({ name }: { name: any }) {
     return (
         <Box as="header" position="fixed" width="100%" bg="white" zIndex={200}>
             <Flex width="100%" mt={3}>
-                <Heading ml={6} size="lg" position="fixed" left="0">Project Tracker</Heading>
-                <Spacer />
-                <Flex align="center">
+                <Flex align="center" ml={2}>
                 <Avatar name={name}></Avatar>
                 <Text as="b" ml={2}>{name}</Text>
                 </Flex>

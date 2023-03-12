@@ -25,5 +25,11 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@myhost:5432/cs261
     ports:
       - 3000:3000
+  flask:
+    build:
+      context: ./machinelearning
+      dockerfile: Dockerfile
+    ports:
+      - 3001:3001
 volumes:
   postgres-data:

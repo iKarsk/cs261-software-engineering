@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { redirect } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import styles from './page.module.css'
-import { Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select, Wrap, WrapItem, Tag, HStack } from '@chakra-ui/react'
+import { Switch, Divider, Button, Box, useDisclosure, Heading, Text, Flex, useToast, Spacer, Card, CardBody, CardFooter, CardHeader, SimpleGrid, Center, StackDivider, Progress, Link, Select, Wrap, WrapItem, Tag, HStack } from '@chakra-ui/react'
 import Loading from "@/components/loading";
 import WarningMessage from "@/components/WarningMessage";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -39,6 +39,13 @@ Input,
 InputGroup,
 InputLeftElement
 } from '@chakra-ui/react'
+
+import {
+    Alert,
+    AlertIcon,
+    AlertTitle,
+    AlertDescription,
+  } from '@chakra-ui/react'
 
 import {
     AlertDialog,
@@ -92,14 +99,17 @@ export default function Page({
 
     const router = useRouter();
     const {status, data} = useSession();
-    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1});
+    const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0, end_date: ""});
     const [loaded, setLoaded] = useState(false);
+
+    const [width, setWidth] = useState<number>(0);
+
 
     const [needMorale, setNeedMorale] = useState(false);
     const [morale, setMorale] = useState(0);
     const { isOpen: isMoraleOpen, onOpen: onMoraleOpen, onClose: onMoraleClose } = useDisclosure();
 
-    const [allMorales, setAllMorales] = useState({AvgDayMorale: 0, AvgWeekMorale: 0, DayMorale: []});
+    const [allMorales, setAllMorales] = useState({AvgDayMorale: 0, AvgWeekMorale: 0, AvgMorale: 0, DayMorale: []});
 
     const [team, setTeam] = useState<any[]>([]);
     const { isOpen: isTeamOpen, onOpen: onTeamOpen, onClose: onTeamClose } = useDisclosure();
@@ -129,10 +139,13 @@ export default function Page({
 
     const [githubRepos, setGithubRepos] = useState([""]);
     const [username, setUsername] = useState("");
+    const [repo, setRepo] = useState("");
 
     const [predictFunds, setPredictFunds] = useState({ funding_required : 0 });
     const [gain, setGain] = useState({ project_gain : 0, suggest_size : 0, suggest_duration : 0, suggest_gains : 0 });
     const [effort, setEffort] = useState({ effort_required : 0 });
+
+    const [switchToggle, setSwitchToggle] = useState(false);
 
     const { isOpen: isDeleteProjectOpen, onOpen: onDeleteProjectOpen, onClose: onDeleteProjectClose } = useDisclosure();
     const { isOpen: isAbandonProjectOpen, onOpen: onAbandonProjectOpen, onClose: onAbandonProjectClose } = useDisclosure();
@@ -154,6 +167,17 @@ export default function Page({
         return () => clearTimeout(delayDebounceFn)
     }, [username])
 	
+    function handleWindowSizeChange() {
+        setWidth(window.innerWidth);
+    }
+
+    useEffect(() => {
+        setWidth(window.innerWidth);
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+        window.removeEventListener('resize', handleWindowSizeChange);
+    }
+}, []);
 
     const { isOpen: isTaskOpen, onOpen: onTaskOpen, onClose: onTaskClose } = useDisclosure();
 
@@ -183,10 +207,14 @@ export default function Page({
                     };
 
                     const response = await fetch(endpoint, options);
+                    const json = await response.json();
+                    setProject(json);
+
+
 
 
                     // Get all morale details
-                    const endpointMorale = "/api/project/getMorales";
+                    const endpointMorale = json.status === 0 ? "/api/project/getMorales" : "/api/project/getAllProjectMorales";
 
                     const optionsMorale = {
                         method: 'POST',
@@ -228,13 +256,13 @@ export default function Page({
 		    const devRes = await fetch(endpointDev, optionsDev);
 
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
-                        const json = await response.json();
-                        setProject(json);
                         setProjectName(json.name);
                         setDeadline(json.deadline);
                         setBudget(json.budget);
                         setRepository(json.repository_link);
                         setCategories(json.categories);
+                        setSwitchToggle(json.repository_link === "");
+
                         
 
                         const taskJson = await taskRes.json();
@@ -248,8 +276,10 @@ export default function Page({
                         const moraleJson = await moraleResponse.json();
 
                         setAllMorales(moraleJson);
+                        if(json.status === 0){
+                            setNeedMorale(Number(json.morale) === -1 ? true : false);
+                        }
                         
-                        setNeedMorale(Number(json.morale) === -1 ? true : false);
                         setLoaded(true);
                         
 
@@ -420,13 +450,17 @@ export default function Page({
       }
 
       const resetEdit = () => {
+        onEditClose();
         setProjectName(project.name);
         setDeadline(project.deadline);
         setBudget(project.budget);
         setRepository(project.repository_link);
+        setUsername("");
+        setRepo("");
         setCategories(project.categories);
+        setSwitchToggle(project.repository_link === "");
 
-        onEditClose();
+        
       }
 
 
@@ -437,9 +471,19 @@ export default function Page({
 	    name: projectName,
 	    deadline: deadline,
 	    budget: budget,
-	    repository_link: repository,
+	    repository_link: "",
         categories: categories,
         };
+
+        if(switchToggle){
+            if(username === "" || repo === ""){
+                postData.repository_link = ""
+            } else{
+                postData.repository_link = `https://www.github.com/${username}/${repo}`;
+            }
+        } else{
+            postData.repository_link = repository;
+        }
 
 
         const JSONdata = JSON.stringify(postData);
@@ -463,11 +507,17 @@ export default function Page({
             name: projectName,
             deadline: deadline,
             budget: budget,
-            repository_link: repository,
+            repository_link: postData.repository_link,
             categories: categories,
         }));
 
         onEditClose();
+        setRepository(postData.repository_link);
+        setRepo("");
+        setUsername("");
+        setSwitchToggle(postData.repository_link === "");
+
+        
 
 	
     }
@@ -494,6 +544,31 @@ export default function Page({
         const JSONdata = JSON.stringify(postData);
 
         const endpoint="/api/project/deleteProject";
+
+        const options = {
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSONdata,
+        };
+        const response = await fetch(endpoint, options);
+
+	    const responseJSON = await response.json();
+        router.push("/dashboard");
+    }
+
+    const handleCloseProject = async (status : boolean) => {
+
+        const postData = {
+            projectid: project.id,
+            status: status,
+        };
+
+        const JSONdata = JSON.stringify(postData);
+
+        const endpoint="/api/project/closeProject";
 
         const options = {
             method: 'POST',
@@ -624,6 +699,8 @@ export default function Page({
                         <Text as="b">Deadline: &nbsp;</Text>
                         <Text color="black">{dateStr(project.deadline)}</Text>
                     </Flex>
+                    {project.status === 0 ?
+                    <>
                     <Flex justifyContent="center" direction="column" mt={2}>
                         <Text as="b">Progress:</Text>
                     <Progress mb={1} mt={1} hasStripe size='sm' value={Math.round((((new Date().valueOf()) - new Date(project.start_date).valueOf()) / ((new Date(project.deadline).valueOf()) - (new Date(project.start_date).valueOf()))) * 100)} />
@@ -657,13 +734,24 @@ export default function Page({
                                 </SliderTrack>
                                 
                             </Slider>
+                            </> : (project.status === -1) ? 
+                            <Alert status="error" borderRadius="lg" mt={3} mb={3}>
+                                <AlertIcon />
+                                <AlertTitle>Project abandoned.</AlertTitle>
+                                <AlertDescription>You may view its archive</AlertDescription>
+                            </Alert> : 
+                            <Alert status="success" borderRadius="lg" mt={3} mb={3}>
+                            <AlertIcon />
+                            <AlertTitle>Project completed!</AlertTitle>
+                            <AlertDescription>You may view its archive</AlertDescription>
+                        </Alert>}
                 </Box>
 
         <Tabs variant='enclosed' width="100vw" zIndex={3}>
             <TabList zIndex={3}>
                 <Tab bg="white" zIndex={3}>Overview</Tab>
-                <Tab>Team</Tab>
-                <Tab>Tasks</Tab>
+                <Tab bg="white" zIndex={3}>Team</Tab>
+                <Tab bg="white" zIndex={3}>Tasks</Tab>
                 {project.isManager && <Tab>Manage</Tab>}
             </TabList>
 
@@ -719,19 +807,31 @@ export default function Page({
                             {new Date(project.deadline).toDateString()}
                         </Text>
                         </Flex>
+                        {project.status === 0 ? <>
                         <Flex align="end">
                         <Text pt='2' as='b' fontSize='sm'>Days Left: &nbsp; </Text>
                         <Text pt='2' fontSize='sm'>
                             {new Date() > new Date(project.deadline) ? "Deadline passed" : Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24))}
                         </Text>
                         </Flex>
+                        </> :
+                        <>
+                        <Flex align="end">
+                        <Text pt='2' as='b' fontSize='sm'>Project closed on: &nbsp; </Text>
+                        <Text pt='2' fontSize='sm'>
+                            {new Date(project.end_date).toDateString()}
+                        </Text>
+                        </Flex>
+                        </>
+                        }
+
                         <Flex align="end">
                         <Text pt='2' as='b' fontSize='sm'>Codebase: &nbsp; </Text>
                         <Text pt='2' fontSize='sm'>
                             {project.repository_link ? <Link href={project.repository_link} isExternal>Link <ExternalLinkIcon mx='2px' /></Link> : <Text as='i'>None</Text>}
                         </Text>
                         </Flex>
-                        { project.isManager && <Button onClick={onEditOpen} mt={4}>Edit Project</Button>}
+                        { project.status === 0 && (project.isManager && <Button onClick={onEditOpen} mt={4}>Edit Project</Button>)}
                     </Box>
                     {project.isManager &&
 
@@ -759,13 +859,13 @@ export default function Page({
             </CardBody>
         </Card>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel bg="white" zIndex={3}>
                 <Card>
             <CardHeader>
             <Heading size='md'>Team Overview</Heading>
             </CardHeader>
             <CardBody>
-                {project.isManager && (
+                {project.status === 0 ? (project.isManager && (
                     <>
                     <Heading size='xs' textTransform='uppercase' mb={5}>Daily Team Morale</Heading>
                     <Slider value={allMorales.AvgDayMorale} min={0} max={6} step={1} aria-label='Week Morale' width="clamp(300px, 50%, 500px)" mb={10}>
@@ -795,27 +895,90 @@ export default function Page({
                                 {(Math.abs((allMorales.AvgDayMorale - allMorales.AvgWeekMorale)) / allMorales.AvgWeekMorale * 100).toFixed(2)}% from weekly avg.
                             </StatHelpText>
                         </Stat>
+
+                        <Divider mt={3} mb={3} />
+                    
+                    </>
+                )) : (
+                    <>
+                    <Heading size='xs' textTransform='uppercase' mb={5}>Average Morale for Project Duration</Heading>
+                    <Slider value={allMorales.AvgMorale} min={0} max={6} step={1} aria-label='Morale for Entire Project' width="clamp(300px, 50%, 500px)" mb={10}>
+                                    <SliderMark value={0} {...labelStyles}>
+                                        < FaRegFlushed />
+                                    </SliderMark>
         
+                                    <SliderMark value={3} {...labelStyles}>
+                                        < FaRegMeh />
+                                    </SliderMark>
         
-        
-                    <Divider mt={3} mb={3} />
+                                    <SliderMark value={6} {...labelStyles}>
+                                        < FaRegGrinBeam />
+                                    </SliderMark>
+                                        <SliderTrack bg='grey'>
+                                            <Box position="relative" right={10} />
+                                            <SliderFilledTrack bg={allMorales.AvgMorale < 3 ? 'tomato' : 'green'} />
+                                        </SliderTrack>
+                                        
+                                    </Slider>
+
+                                    <Divider mt={3} mb={3} />
+                    
                     </>
                 )}
             
             <Heading size='xs' textTransform='uppercase' mb={5}>Team Composition</Heading>
             <List spacing={3}>
 				    {team.map((e, i) => (
-					    <Flex align="center" key={i}><Avatar name={e.forename + " " + e.surname} mr={3}/><ListItem key={i}>{e.forename} {e.surname}</ListItem>{e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}{project.isManager && <Text>&nbsp; {e.years_experience} years experience</Text>}</Flex>
+					    <Flex align="center" key={i}>
+                            <Avatar name={e.forename + " " + e.surname} mr={3}/>
+                            <ListItem key={i}>
+                                {e.forename} {e.surname}
+                            </ListItem>
+                            {e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}
+                            {project.isManager && <Text ml={5}>{e.years_experience} years experience</Text>}
+                            {project.status === 0 && project.isManager && (e.morale !== null ? 
+                            (
+                                <>
+                                {width >= 500 &&
+                                <Slider value={e.morale} ml={10} min={0} max={6} step={1} aria-label={e.forename + "'s morale"} width="clamp(200px, 50%, 400px)" mb={10}>
+                                <SliderMark value={0} {...labelStyles}>
+                                    < FaRegFlushed />
+                                </SliderMark>
+    
+                                <SliderMark value={3} {...labelStyles}>
+                                    < FaRegMeh />
+                                </SliderMark>
+    
+                                <SliderMark value={6} {...labelStyles}>
+                                    < FaRegGrinBeam />
+                                </SliderMark>
+                                    <SliderTrack bg='grey'>
+                                        <Box position="relative" right={10} />
+                                        <SliderFilledTrack bg={e.morale < 3 ? 'tomato' : 'green'} />
+                                    </SliderTrack>
+                                    
+                                </Slider>}
+                                <Stat ml={8}>
+                                    <StatNumber>{e.morale}<Text as="sub" color="grey">/6</Text></StatNumber>
+                                    <StatHelpText>
+                                        <StatArrow type={e.morale >= e.yesterdaysMorale ? 'increase' : 'decrease'} />
+                                        {Math.abs(e.morale - e.yesterdaysMorale)} {e.morale >= e.yesterdaysMorale ? 'up' : "down"} from yesterday.
+                                    </StatHelpText>
+                                </Stat>
+                                </>
+                            ) 
+                            : <Text ml={10} as="b" color="tomato">Hasn't submitted morale yet</Text>)}
+                        </Flex>
 				    ))}
 			    </List>
             <Text mt={3} size="sm">({team.length} total)</Text>
 
                 
-            {project.isManager && <Button onClick={onInviteOpen} mt={5}>Invite User</Button>}
+            {project.status === 0 && (project.isManager && <Button onClick={onInviteOpen} mt={5}>Invite User</Button>)}
             </CardBody>
         </Card>
                 </TabPanel>
-                <TabPanel>
+                <TabPanel bg="white" zIndex={3}>
                 <Card>
             <CardHeader>
             <Heading size='md'>Task Overview</Heading>
@@ -830,11 +993,11 @@ export default function Page({
 
             </CardBody>
             <CardFooter>
-            {project.isManager && <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>}
+            {project.status === 0 && (project.isManager && <Button onClick={onTaskFormOpen} mt={5}>Add Task</Button>)}
             </CardFooter>
         </Card>
                 </TabPanel>
-                {project.isManager && <TabPanel>
+                {project.isManager && <TabPanel bg="white" zIndex={3}>
                     <Card>
             <CardHeader>
             <Heading size='md'>Manage Project</Heading>
@@ -844,12 +1007,14 @@ export default function Page({
                     <WrapItem>
                         <Button colorScheme="orange" onClick={onDeleteProjectOpen}>Delete Project</Button>
                     </WrapItem>
+                    {project.status === 0 && <>
                     <WrapItem>
                         <Button colorScheme="red" onClick={onAbandonProjectOpen}>Abandon project</Button>
                     </WrapItem>
                     <WrapItem>
                         <Button colorScheme="green" onClick={onCompleteProjectOpen}>Complete project</Button>
                     </WrapItem>
+                    </>}
                 </Wrap>
             </CardBody>
         </Card>
@@ -979,7 +1144,7 @@ export default function Page({
                                 onAbandonProjectClose();}}>
                                 Cancel
                             </Button>
-                            <Button colorScheme='red' onClick={onAbandonProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("abandon " + project.name)}>
+                            <Button colorScheme='red' onClick={() => handleCloseProject(false)} ml={3} isDisabled={manageProjectConfirmation !== ("abandon " + project.name)}>
                                 Abandon
                             </Button>
                         </AlertDialogFooter>
@@ -1014,7 +1179,7 @@ export default function Page({
                                 onCompleteProjectClose();}}>
                                 Complete
                             </Button>
-                            <Button colorScheme='green' onClick={onCompleteProjectClose} ml={3} isDisabled={manageProjectConfirmation !== ("complete " + project.name)}>
+                            <Button colorScheme='green' onClick={() => handleCloseProject(true)} ml={3} isDisabled={manageProjectConfirmation !== ("complete " + project.name)}>
                                 Complete
                             </Button>
                         </AlertDialogFooter>
@@ -1251,10 +1416,13 @@ export default function Page({
                                 
                             </FormControl>
 
-                            <FormControl mt={4}>
-                                <FormLabel>Repository Link</FormLabel>
-                                <Input defaultValue={project.repository_link} onChange={event => setRepository(event.currentTarget.value)}/>
+                            <Divider mt={3}/> 
+                            <FormControl mt={4} display='flex' alignItems='center'>
+                                <FormLabel mb='0'>GitHub Repository?</FormLabel>
+                                <Switch onChange={() => setSwitchToggle(!switchToggle)} defaultChecked={switchToggle} colorScheme="green" sx={{ 'span.chakra-switch__track:not([data-checked])': { backgroundColor: 'tomato' } }}/>
                             </FormControl>
+
+                            {switchToggle ? 
                             <Flex>
                             <FormControl mt={4} width="45%">
                                 <FormLabel>Username</FormLabel>
@@ -1263,12 +1431,16 @@ export default function Page({
                             <Spacer />
                             <FormControl mt={4} width="45%">
                                 <FormLabel>Repository</FormLabel>
-                                <Select placeholder="Select repository">
+                                <Select placeholder="Select repository" onChange={(e) => setRepo(e.currentTarget.value)}>
                                     {githubRepos.map((e, i) => ( <option key={i} value={e}>{e}</option> ))}
                                 </Select>
                             </FormControl>
-                            </Flex>
-
+                            </Flex> :
+                         <FormControl mt={4}>
+                            <FormLabel>Repository Link</FormLabel>
+                            <Input defaultValue={project.repository_link} onChange={event => setRepository(event.currentTarget.value)}/>
+                         </FormControl>   
+                            }
                         </ModalBody>
                         <ModalFooter>
                             <Button colorScheme='blue' mr={3} type="submit" onClick={handleEdit}>
