@@ -415,6 +415,9 @@ export default function Page({
     function calculateRiskValue () {
         let tempMoraleRisk = 0;
 
+        console.log("average week morale is");
+        console.log(allMorales.AvgWeekMorale);
+
         if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3){
             tempMoraleRisk += 50;
         }else if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3){
@@ -422,6 +425,8 @@ export default function Page({
         } else if(allMorales.AvgWeekMorale >= 3 && allMorales.AvgDayMorale < 3){
             tempMoraleRisk += 10;
         }
+        console.log("temp morale risk");
+        console.log(tempMoraleRisk);
 
 
 
@@ -454,9 +459,10 @@ export default function Page({
 
         
 
-        console.log("moraleRisk: " + moraleRisk + "");
+        console.log("tempMoraleRisk: " + tempMoraleRisk + "");
 
         return Number(tempMoraleRisk + deadlineRisk + teamRisk);
+        
     }
 
     const submitMorale = async () => {
