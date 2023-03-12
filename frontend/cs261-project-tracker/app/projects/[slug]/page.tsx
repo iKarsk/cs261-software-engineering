@@ -436,12 +436,12 @@ export default function Page({
         
         console.log("suggested duration is" + suggestedDuration);
         console.log("gain min size is " + gain.min_size)
-        if(suggestedDuration > projectDuration * 1.5){
-            deadlineRisk += 40;
+        if(suggestedDuration > projectDuration * 1.25){
+            deadlineRisk += 30;
         }
-        else if(suggestedDuration >= 1.25 * projectDuration){
-            deadlineRisk += 25;
-        } else if(suggestedDuration >= 1.1 * projectDuration){
+        else if(suggestedDuration >= 1.15 * projectDuration){
+            deadlineRisk += 15;
+        } else if(suggestedDuration >= 1.01 * projectDuration){
             deadlineRisk += 10;
         }
 
