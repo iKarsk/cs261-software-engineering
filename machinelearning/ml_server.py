@@ -96,6 +96,10 @@ def predictGain():
     estimated_duration = df["Estimated duration"][0]
 
     suggest_size, suggest_duration, suggest_gains = department_size, estimated_duration, res
+    if (department_size != 11):
+        suggest_range = size_ranges[department_size-1]
+    else:
+        suggest_range = (50,-1)
 
     for i in range(1, 12):
         if (i != department_size):
@@ -106,8 +110,12 @@ def predictGain():
                     trial = model2.predict(df)
                     if (trial[0] > suggest_gains):
                         suggest_size, suggest_duration, suggest_gains = i, estimated_duration + j, trial[0]
+                        if (i != 11):
+                            suggest_range = size_ranges[i-1]
+                        else:
+                            suggest_range = (50, -1)
 
-    return jsonify({ 'predicted_gain' : res, 'suggested_size' : int(suggest_size), 'suggested_duration' : int(suggest_duration), 'potential_gains' : suggest_gains })
+    return jsonify({ 'predicted_gain' : res, 'min_size' : suggest_range[0], 'suggested_duration' : int(suggest_duration), 'potential_gains' : suggest_gains, 'max_size' : suggest_range[1] })
 
 
 @app.route('/api/predictEffort', methods=['POST'])

@@ -143,8 +143,9 @@ export default function Page({
 
     const [managerExp, setManagerExp] = useState(0);
     const [predictFunds, setPredictFunds] = useState({ enough_funding : 0 });
-    const [gain, setGain] = useState({ predicted_gain : 0, suggested_size : 0, suggested_duration : 0, potential_gains : 0 });
+    const [gain, setGain] = useState({ predicted_gain : 0, min_size : 0, suggested_duration : 0, potential_gains : 0, max_size: 0});
     const [effort, setEffort] = useState({ effort_required : 0 });
+    const [riskVal, setRiskVal] = useState(50);
 
     const [switchToggle, setSwitchToggle] = useState(false);
 
@@ -257,7 +258,6 @@ export default function Page({
 		    const devRes = await fetch(endpointDev, optionsDev);
 
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
-			    console.log(json);
                         setProjectName(json.name);
                         setDeadline(json.deadline);
                         setBudget(json.budget);
@@ -325,8 +325,7 @@ export default function Page({
 		    const date2:Date = new Date(project.deadline);
 
 		    const diffInMs = Number(Math.floor(Math.abs(date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24 * 30)));
-		    console.log(diffInMs);
-		    console.log(team.length);
+
                     const optionsGain = {
                         method: 'POST',
                         headers: {
@@ -374,7 +373,7 @@ export default function Page({
 
 	    fetchData().catch(console.error);
 
-    }, [loaded]);
+    }, [budget, deadline, categories]);
 
     const queryUsername = async (username: string) => {
         return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
@@ -857,6 +856,11 @@ export default function Page({
                             {allMorales.AvgDayMorale < 3 && allMorales.AvgWeekMorale >= 3 && <WarningMessage message="Your team's morale is low. This may affect the project's progress." />}
                         </Text>
 			<StatGroup>
+			    	<Stat>
+			    		<StatLabel>Project Risk Level</StatLabel>
+			   		<CircularProgress value={riskVal} color="red.500" thickness="16px"/> 
+			    
+			    	</Stat>
 				<Stat>
 					<StatLabel>Predicted Project Gain</StatLabel>
 					<StatNumber>{gain.predicted_gain.toFixed(2)}%</StatNumber>
@@ -871,25 +875,29 @@ export default function Page({
 			    	</Stat>
 			</StatGroup>
                     </Box>
-                    }
+		    }
+
+                    {project.isManager &&
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
                             Suggestions
                         </Heading>
 			<StatGroup>
-	    			{ gain.predicted_gain != gain.potential_gains &&
 				<Stat>
 					<StatLabel>Potential Project Gain</StatLabel>
 					<StatNumber>{gain.potential_gains.toFixed(2)}%</StatNumber>
-					<StatHelpText></StatHelpText>
 				</Stat>
-				}
 				<Stat>
-					<StatLabel>Predicted Effort Required</StatLabel>
-					<StatNumber>{effort.effort_required.toFixed(0)} hours</StatNumber>
+					<StatLabel>Suggested Team Size</StatLabel>
+					{gain.min_size == 50 ? <StatNumber>&gt;50 members</StatNumber> : <StatNumber> {gain.min_size} - {gain.max_size} members</StatNumber>}
+				</Stat>
+				<Stat>
+					<StatLabel>Suggested Project Length</StatLabel>
+					<StatNumber>{gain.suggested_duration.toFixed(0)} months</StatNumber>
 				</Stat>
 			</StatGroup>
                     </Box>
+		    }
                 </Stack>
             </CardBody>
         </Card>

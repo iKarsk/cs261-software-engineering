@@ -23,7 +23,6 @@ df = df[df['funding_total_usd'] != '-']
 # Remove any rows where the category_list is empty
 df = df[df['category_list'].notnull()]
 
-
 # Standardize funding_total_usd
 scaler = StandardScaler()
 df['funding_total_usd'] = scaler.fit_transform(df[['funding_total_usd']])
@@ -53,10 +52,11 @@ categories = [cat for cat_list in df['category_list'].str.split('|') for cat in 
 
 category_counts = Counter(categories)
 
+"""
 # Print categories in descending order of their counts
 for category, count in category_counts.most_common():
     print(f"{category}: {count}")
-
+"""
 
 # Remove the category_list column
 df = df.drop('category_list', axis=1)
@@ -77,8 +77,8 @@ models = [LogisticRegression(random_state=42),
           DecisionTreeClassifier(random_state=42),
           KNeighborsClassifier(),
           GaussianNB(),
-          SVC(random_state=42),
           SVC(kernel='linear', random_state=42),
+          SVC(random_state=42),
           RandomForestClassifier(random_state=42)]
 
 # Fit each model on the training set and evaluate its performance on the testing set
@@ -96,13 +96,11 @@ for model in models:
     acc = accuracy_score(y_test, y_pred)
     print(type(model).__name__, "accuracy:", acc)
     print("Training time on test set:", end_time - start_time, "seconds")
-"""
-
-
 
 model = SVC(probability=True)
+"""
 
-# Train a SVC model on the data
+model = SVC(kernel='linear', probability=True)
 start_time = time.time()
 model.fit(X, y)
 end_time = time.time()
@@ -116,4 +114,3 @@ with open('models/model.pkl', 'wb') as f:
 with open("models/categories.txt", "w") as f:
     for c in list(unique_categories):
         f.write(str(c) +"\n")
-
