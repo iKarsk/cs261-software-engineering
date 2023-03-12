@@ -121,6 +121,7 @@ export default function Page({
     const {status, data} = useSession();
     const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0, end_date: ""});
     const [loaded, setLoaded] = useState(false);
+    const [secondLoaded, setSecondLoaded] = useState(false);
 
     const [width, setWidth] = useState<number>(0);
 
@@ -166,6 +167,8 @@ export default function Page({
     const [gain, setGain] = useState({ predicted_gain : 0, min_size : 0, suggested_duration : 0, potential_gains : 0, max_size: 0});
     const [effort, setEffort] = useState({ effort_required : 0 });
     const [riskVal, setRiskVal] = useState(0);
+
+    const [allDataFetched, setAllDataFetched] = useState(false);
 
     const [switchToggle, setSwitchToggle] = useState(false);
 
@@ -299,27 +302,12 @@ export default function Page({
 
                         setAllMorales(moraleJson);
 
-                        let moraleRisk = 0
-
-                        if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale < 3){
-                            moraleRisk += 50;
-                        }else if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale >= 3){
-                            moraleRisk += 25;
-                        } else if(moraleJson.AvgWeekMorale >= 3 && moraleJson.AvgDayMorale < 3){
-                            moraleRisk += 10;
-                        }
-                        console.log("moraleRisk: " + moraleRisk + "");
-
-                        setRiskVal(riskVal + moraleRisk);
-
-                        console.log("risk val from morale useffect" + riskVal);
-
-
                         if(json.status === 0){
                             setNeedMorale(Number(json.morale) === -1 ? true : false);
                         }
                         
                         setLoaded(true);
+                        
                         
 
                     }else{
@@ -328,6 +316,7 @@ export default function Page({
                 };
 
                 fetchData().catch(console.error);
+
         
             }
         }
@@ -406,9 +395,33 @@ export default function Page({
 			const effortJson = await responseEffort.json();
 			setEffort(effortJson);
 
+		}
+    	    }
+
+	    fetchData().catch(console.error);
+        setSecondLoaded(true);
+
+
+
+
+    }, [budget, deadline, categories]);
+
+    useEffect(() => {
+        if(loaded && secondLoaded){
+
+            let moraleRisk = 0
+
+            if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3){
+                moraleRisk += 50;
+            }else if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3){
+                moraleRisk += 25;
+            } else if(allMorales.AvgWeekMorale >= 3 && allMorales.AvgDayMorale < 3){
+                moraleRisk += 10;
+            }
+            console.log("moraleRisk: " + moraleRisk + "");
 
             let deadlineRisk = 0
-            const suggestedDuration = gainJson.suggested_duration * 30;
+            const suggestedDuration = gain.suggested_duration * 30;
             const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
     
             if(suggestedDuration > daysLeft * 1.5){
@@ -422,24 +435,18 @@ export default function Page({
     
             let teamRisk = 0;
     
-            if (team.length < gainJson.min_size){
+            if (team.length < gain.min_size){
                 teamRisk += 30;
             };
 
-            setRiskVal(riskVal + deadlineRisk + teamRisk);
+            setRiskVal(moraleRisk + deadlineRisk + teamRisk);
 
             console.log("deadline risk is: " + deadlineRisk);
             console.log("team risk is: " + teamRisk);
-            console.log("risk val from 2nd useffect is" + riskVal);
-		}
-    	    }
 
-	    fetchData().catch(console.error);
-
-
-
-
-    }, [budget, deadline, categories]);
+            console.log("risk val from useffect" + riskVal);
+        }
+    }, [loaded, secondLoaded])
 
 
     const queryUsername = async (username: string) => {
