@@ -10,7 +10,27 @@ import Loading from "@/components/loading";
 import WarningMessage from "@/components/WarningMessage";
 import ErrorMessage from "@/components/ErrorMessage";
 
+/*
 
+Risk:
+    - Morale:
+        - Week AND daily < 3 : + 50% risk
+        - Week < 3 and daily > 3 : 30% risk
+        - week > 3 and daily < 3 : 10% risk
+        - Otherwise : 0% risk
+    - Deadline:
+        - If suggest project length > 1.5 * project duration : + 50% risk
+        - If suggest project length > 1.25 * project duration : + 30% risk
+        - If suggest project length > 1.1 * project duration : + 10% risk
+        - Otherwise : 0% risk
+    - Team size:
+        - If actual team size < suggested : 30%
+        otherwise: 0%
+
+
+
+
+*/
 import { FaRegFlushed, FaRegGrinBeam, FaRegFrown, FaRegMeh } from 'react-icons/fa';
 import { ArrowBackIcon, ExternalLinkIcon} from '@chakra-ui/icons'
 
@@ -145,7 +165,7 @@ export default function Page({
     const [predictFunds, setPredictFunds] = useState({ enough_funding : 0, probability: 0 });
     const [gain, setGain] = useState({ predicted_gain : 0, min_size : 0, suggested_duration : 0, potential_gains : 0, max_size: 0});
     const [effort, setEffort] = useState({ effort_required : 0 });
-    const [riskVal, setRiskVal] = useState(50);
+    const [riskVal, setRiskVal] = useState(0);
 
     const [switchToggle, setSwitchToggle] = useState(false);
 
@@ -373,7 +393,42 @@ export default function Page({
 
 	    fetchData().catch(console.error);
 
+
     }, [budget, deadline, categories]);
+
+    useEffect(() => {
+        let moraleRisk = 0
+
+        if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3){
+            moraleRisk += 50;
+        }else if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3){
+            moraleRisk += 25;
+        } else if(allMorales.AvgWeekMorale >= 3 && allMorales.AvgDayMorale < 3){
+            moraleRisk += 10;
+        }
+
+        let deadlineRisk = 0
+        const suggestedDuration = gain.suggested_duration * 30;
+        const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
+
+        if(suggestedDuration > daysLeft * 1.5){
+            deadlineRisk += 50;
+        }
+        else if(suggestedDuration >= 1.25 * daysLeft){
+            deadlineRisk += 25;
+        } else if(suggestedDuration >= 1.1 * daysLeft){
+            deadlineRisk += 10;
+        }
+
+        let teamRisk = 0;
+
+        if (team.length < gain.min_size){
+            teamRisk += 30;
+        };
+
+        const totalRisk = moraleRisk + deadlineRisk + teamRisk;
+        setRiskVal(totalRisk);
+    }, [])
 
     const queryUsername = async (username: string) => {
         return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
