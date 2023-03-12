@@ -1428,7 +1428,7 @@ export default function Page({
                                 <ReactSelect
         isMulti
         options={categoryList}
-        placeholder="Select some colors..."
+        placeholder="Select project categories..."
         closeMenuOnSelect={false}
         selectedOptionColor="green"
         hideSelectedOptions={false}

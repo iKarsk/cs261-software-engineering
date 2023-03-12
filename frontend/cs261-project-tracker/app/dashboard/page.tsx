@@ -344,7 +344,7 @@ export default function Dashboard() {
                                 <ReactSelect
         isMulti
         options={categories}
-        placeholder="Select some colors..."
+        placeholder="Select project categories..."
         closeMenuOnSelect={false}
         selectedOptionColor="green"
         hideSelectedOptions={false}
