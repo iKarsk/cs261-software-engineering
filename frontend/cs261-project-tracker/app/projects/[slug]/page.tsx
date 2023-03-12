@@ -121,7 +121,8 @@ export default function Page({
     const {status, data} = useSession();
     const [project, setProject] = useState({id : -1, name : "", start_date : "", isManager : false, budget: -1, deadline : "", repository_link : "", categories : [""], morale: -1, status: 0, end_date: ""});
     const [loaded, setLoaded] = useState(false);
-    const [secondLoaded, setSecondLoaded] = useState(false);
+
+
 
     const [width, setWidth] = useState<number>(0);
 
@@ -166,7 +167,8 @@ export default function Page({
     const [predictFunds, setPredictFunds] = useState({ enough_funding : 0, probability: 0 });
     const [gain, setGain] = useState({ predicted_gain : 0, min_size : 0, suggested_duration : 0, potential_gains : 0, max_size: 0});
     const [effort, setEffort] = useState({ effort_required : 0 });
-    const [riskVal, setRiskVal] = useState(0);
+    const [moraleRisk, setMoraleRisk] = useState(0);
+    const [otherRisk, setOtherRisk] = useState(0);
 
     const [allDataFetched, setAllDataFetched] = useState(false);
 
@@ -305,6 +307,19 @@ export default function Page({
                         if(json.status === 0){
                             setNeedMorale(Number(json.morale) === -1 ? true : false);
                         }
+
+                        let tempMoraleRisk = 0;
+
+                        if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale < 3){
+                            tempMoraleRisk += 50;
+                        }else if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale >= 3){
+                            tempMoraleRisk += 25;
+                        } else if(moraleJson.AvgWeekMorale >= 3 && moraleJson.AvgDayMorale < 3){
+                            tempMoraleRisk += 10;
+                        }
+                        setMoraleRisk(tempMoraleRisk);
+
+                        console.log("moraleRisk: " + moraleRisk + "");
                         
                         setLoaded(true);
                         
@@ -395,39 +410,15 @@ export default function Page({
 			const effortJson = await responseEffort.json();
 			setEffort(effortJson);
 
-		}
-    	    }
-
-	    fetchData().catch(console.error);
-        setSecondLoaded(true);
 
 
-
-
-    }, [budget, deadline, categories]);
-
-    useEffect(() => {
-        if(loaded && secondLoaded){
-            console.log(secondLoaded);
-            
-
-            let moraleRisk = 0
-
-            if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3){
-                moraleRisk += 50;
-            }else if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3){
-                moraleRisk += 25;
-            } else if(allMorales.AvgWeekMorale >= 3 && allMorales.AvgDayMorale < 3){
-                moraleRisk += 10;
-            }
-            console.log("moraleRisk: " + moraleRisk + "");
 
             let deadlineRisk = 0
-            const suggestedDuration = gain.suggested_duration * 30;
+            const suggestedDuration = gainJson.suggested_duration * 30;
             const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
             
             console.log("suggested duration is" + suggestedDuration);
-            console.log("gain min size is " + gain.min_size)
+            console.log("gain min size is " + gainJson.min_size)
             if(suggestedDuration > daysLeft * 1.5){
                 deadlineRisk += 50;
             }
@@ -439,18 +430,24 @@ export default function Page({
     
             let teamRisk = 0;
     
-            if (team.length < gain.min_size){
+            if (team.length < gainJson.min_size){
                 teamRisk += 30;
             };
 
-            setRiskVal(moraleRisk + deadlineRisk + teamRisk);
+            setOtherRisk(deadlineRisk + teamRisk);
 
             console.log("deadline risk is: " + deadlineRisk);
             console.log("team risk is: " + teamRisk);
 
-            console.log("risk val from useffect" + riskVal);
-        }
-    }, [loaded, secondLoaded])
+		}
+    	    }
+
+	    fetchData().catch(console.error);
+
+
+
+
+    }, [budget, deadline, categories]);
 
 
     const queryUsername = async (username: string) => {
@@ -936,7 +933,7 @@ export default function Page({
 			<StatGroup>
 			    	<Stat>
 			    		<StatLabel>Project Risk Level</StatLabel>
-			   		<CircularProgress value={riskVal} color="red.500" thickness="16px"/> 
+			   		<CircularProgress value={otherRisk + moraleRisk} color="red.500" thickness="16px"/> 
 			    
 			    	</Stat>
 				<Stat>
