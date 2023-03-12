@@ -872,7 +872,7 @@ export default function Page({
 			    	<Stat>
 			    		<StatLabel>Sufficient Budget</StatLabel>
 			    		<StatNumber>{ predictFunds.enough_funding == 1 ? "Yes" : "No"}</StatNumber>
-			    		<StatHelpText>{ 100 * predictFunds.probability.toFixed(2) }% confidence</StatHelpText>
+			    		<StatHelpText>{ 100 * Number(predictFunds.probability.toFixed(2)) }% confidence</StatHelpText>
 			    	</Stat>
 			</StatGroup>
                     </Box>
