@@ -19,9 +19,9 @@ Risk:
         - week > 3 and daily < 3 : 10% risk
         - Otherwise : 0% risk
     - Deadline:
-        - If suggest project length > 1.5 * project duration : + 50% risk
-        - If suggest project length > 1.25 * project duration : + 30% risk
-        - If suggest project length > 1.1 * project duration : + 10% risk
+        - If suggest project length > 1.1 * project duration : + 50% risk
+        - If suggest project length > 1.05 * project duration : + 30% risk
+        - If suggest project length > 1.005 * project duration : + 10% risk
         - Otherwise : 0% risk
     - Team size:
         - If actual team size < suggested : 30%
@@ -419,11 +419,11 @@ export default function Page({
         console.log(allMorales.AvgWeekMorale);
 
         if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3){
-            tempMoraleRisk += 50;
+            tempMoraleRisk += 30;
         }else if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3){
-            tempMoraleRisk += 25;
+            tempMoraleRisk += 15;
         } else if(allMorales.AvgWeekMorale >= 3 && allMorales.AvgDayMorale < 3){
-            tempMoraleRisk += 10;
+            tempMoraleRisk += 5;
         }
         console.log("temp morale risk");
         console.log(tempMoraleRisk);
@@ -432,23 +432,24 @@ export default function Page({
 
         let deadlineRisk = 0
         const suggestedDuration = gain.suggested_duration * 30;
-        const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
+        const projectDuration = Math.floor((new Date(project.deadline).valueOf() - new Date(project.start_date).valueOf()) / (1000 * 3600 * 24))
         
         console.log("suggested duration is" + suggestedDuration);
         console.log("gain min size is " + gain.min_size)
-        if(suggestedDuration > daysLeft * 1.5){
-            deadlineRisk += 50;
+        if(suggestedDuration > projectDuration * 1.5){
+            deadlineRisk += 40;
         }
-        else if(suggestedDuration >= 1.25 * daysLeft){
+        else if(suggestedDuration >= 1.25 * projectDuration){
             deadlineRisk += 25;
-        } else if(suggestedDuration >= 1.1 * daysLeft){
+        } else if(suggestedDuration >= 1.1 * projectDuration){
             deadlineRisk += 10;
         }
 
         let teamRisk = 0;
         
         if (team.length < gain.min_size){
-            teamRisk += 30;
+            const diff = gain.min_size - team.length;
+            teamRisk += diff * 10;
         };
 
 
