@@ -206,10 +206,14 @@ export default function Page({
                     };
 
                     const response = await fetch(endpoint, options);
+                    const json = await response.json();
+                    setProject(json);
+
+
 
 
                     // Get all morale details
-                    const endpointMorale = project.status === 0 ? "/api/project/getMorales" : "/api/project/getAllProjectMorales";
+                    const endpointMorale = json.status === 0 ? "/api/project/getMorales" : "/api/project/getAllProjectMorales";
 
                     const optionsMorale = {
                         method: 'POST',
@@ -251,8 +255,6 @@ export default function Page({
 		    const devRes = await fetch(endpointDev, optionsDev);
 
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
-                        const json = await response.json();
-                        setProject(json);
                         setProjectName(json.name);
                         setDeadline(json.deadline);
                         setBudget(json.budget);
@@ -273,7 +275,7 @@ export default function Page({
                         const moraleJson = await moraleResponse.json();
 
                         setAllMorales(moraleJson);
-                        if(project.status === 0){
+                        if(json.status === 0){
                             setNeedMorale(Number(json.morale) === -1 ? true : false);
                         }
                         
@@ -932,7 +934,7 @@ export default function Page({
                             </ListItem>
                             {e.id === data?.user.id && <Text fontSize="xs" as="b" color="grey">&nbsp; (you)</Text>}
                             {project.isManager && <Text ml={5}>{e.years_experience} years experience</Text>}
-                            {project.isManager && (e.morale !== null ? 
+                            {project.status === 0 && project.isManager && (e.morale !== null ? 
                             (
                                 <>
                                 {width >= 500 &&
