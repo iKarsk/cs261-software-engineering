@@ -308,8 +308,11 @@ export default function Page({
                         } else if(moraleJson.AvgWeekMorale >= 3 && moraleJson.AvgDayMorale < 3){
                             moraleRisk += 10;
                         }
+                        console.log("moraleRisk: " + moraleRisk + "");
 
                         setRiskVal(riskVal + moraleRisk);
+
+                        console.log("risk val from morale useffect" + riskVal);
 
 
                         if(json.status === 0){
@@ -424,6 +427,10 @@ export default function Page({
             };
 
             setRiskVal(riskVal + deadlineRisk + teamRisk);
+
+            console.log("deadline risk is: " + deadlineRisk);
+            console.log("team risk is: " + teamRisk);
+            console.log("risk val from 2nd useffect is" + riskVal);
 		}
     	    }
 
