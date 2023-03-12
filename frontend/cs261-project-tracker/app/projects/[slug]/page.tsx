@@ -320,6 +320,7 @@ export default function Page({
 		if (response.status === 200 && responseGain.status === 200 && responseEffort.status === 200) {
 	    		const fundJson = await response.json();
 	   		setPredictFunds(fundJson);
+			console.log(fundJson);
 
 			const gainJson = await responseGain.json();
 			setGain(gainJson);

@@ -1,5 +1,6 @@
 import pickle
 import pandas as pd
+import numpy as np
 from flask import Flask, request, jsonify
 import json
 
@@ -33,7 +34,7 @@ with open("models/model3attr.txt", "r") as f:
     model3_attributes.append(line.strip())
 
 # Make a prediction for how much funding is needed for successful project given project categories
-@app.route('/api/predictFunding', methods=['GET', 'POST'])
+@app.route('/api/predictFunding', methods=['POST'])
 def predictFunding():
 
     json_dict = request.get_json()
@@ -50,37 +51,43 @@ def predictFunding():
     prediction = model.predict(category_df)
     res = prediction[0]
 
-    if res < 0:
-        res = 0
-
-    return jsonify({ 'funding_required' : "{:.2f}".format(res)} )
+    return jsonify({ 'enough_funding' : res })
 
 
 # Make a prediction for project financial gain (or loss)
-@app.route('/api/predictGain', methods=['GET', 'POST'])
+@app.route('/api/predictGain', methods=['POST'])
 def predictGain():
-    linked = {"Banking systems" : ["Banking"], "ERP" : ["Enterprise Resource Planning"], "Mobile applications": ["Mobile Analytics", "Mobile Payments", "Mobile Security", "Mobile Search", "Mobile Enterprise", "Mobile Software Tools", "Mobile Health", "Mobile Coupons", "Mobile Social", "Mobile Games", "Mobile Commerce", "Mobile Video", "Mobile Devices", "Mobile", "Mobile Advertising", "Social + Mobile + Local", "Mobile Shopping", "Mobile Infrastructure", "Mobile Emergency&Health", "iOS", "Android"], "Financial and managerial" : ["Financial Services", "Financial Exchanges", "Finance Technology", "Finance", "Personal Finance", "Digital Rights Management", "Knowledge Management", "Property Management", "Lead Management", "Web Presence Management", "Vulnerability Management", "Risk Management", "Project Management", "Energy Management", "Cloud Management", "Fleet Management", "Wealth Management", "Event Management", "Waste Management", "Supply Chain Management", "Career Management", "Identity Management", "IT Management", "Document Management", "Contact Management", "Task Management", "Social Media Management", "Investment Management", "Innovation Management", "Intellectual Asset Management"], "Web applications" : ["Web CMS", "Web Presence Management", "Curated Web", "Web Browsers", "WebOS", "Web Design", "Semantic Web", "Web Tools", "Web Hosting", "Web Development"],"Bespoke applications" : []}
+    linked = {"Banking systems" : ["Banking"], "ERP" : ["Enterprise Resource Planning"], "Mobile applications": ["Mobile Analytics", "Mobile Payments", "Mobile Security", "Mobile Search", "Mobile Enterprise", "Mobile Software Tools", "Mobile Health", "Mobile Coupons", "Mobile Social", "Mobile Games", "Mobile Commerce", "Mobile Video", "Mobile Devices", "Mobile", "Mobile Advertising", "Social + Mobile + Local", "Mobile Shopping", "Mobile Infrastructure", "Mobile Emergency&Health", "iOS", "Android"], "Financial and managerial" : ["FinTech", "Financial Services", "Financial Exchanges", "Finance Technology", "Finance", "Personal Finance", "Digital Rights Management", "Knowledge Management", "Property Management", "Lead Management", "Web Presence Management", "Vulnerability Management", "Risk Management", "Project Management", "Energy Management", "Cloud Management", "Fleet Management", "Wealth Management", "Event Management", "Waste Management", "Supply Chain Management", "Career Management", "Identity Management", "IT Management", "Document Management", "Contact Management", "Task Management", "Social Media Management", "Investment Management", "Innovation Management", "Intellectual Asset Management"], "Web applications" : ["Web CMS", "Web Presence Management", "Curated Web", "Web Browsers", "WebOS", "Web Design", "Semantic Web", "Web Tools", "Web Hosting", "Web Development"],"Bespoke applications" : []}
 
-    # json_dict = request.get_json()
+    size_ranges = [(1, 5), (6, 10), (11, 15), (16, 20), (21, 25), (26, 30), (31, 35), (36, 40), (41, 45), (46, 50)] 
+
+    json_dict = request.get_json()
 
     df = pd.DataFrame(columns=model2_attributes)
     df.loc[0] = [0] * len(model2_attributes)
 
-    df["Mobile applications"][0] = 1
-    df["Estimated duration"][0] = 10
-    df["Size of IT department"][0] = 3
 
-
-    """
-    for attr, val in json_dict.items():
-        if attr not in ["Estimated duration", "Size of IT department"]:
+    for attr, val in json_dict.items():        
+        if (attr == "Application Domain"):
             for main, secondary in linked.items(): 
                 if attr in secondary:
                     df[main][0] = 1
+                    break
 
-            else:
-                df[attr][0] = val
-    """
+        elif (attr == "Size of IT department"):
+            for i, ran in enumerate(size_ranges):
+                l = ran[0]
+                m = ran[1]
+
+                if (l <= val and val <= m):
+                    df[attr][0] = val + 1
+                    break
+
+            df[attr][0] = 11
+
+        else:
+            df[attr][0] = val
+
 
     prediction = model2.predict(df)
     res = prediction[0]
@@ -88,38 +95,32 @@ def predictGain():
     department_size = df["Size of IT department"][0]
     estimated_duration = df["Estimated duration"][0]
 
-    (suggest_size, suggest_duration, suggest_gains) = (department_size, estimated_duration, res)
+    suggest_size, suggest_duration, suggest_gains = department_size, estimated_duration, res
 
     for i in range(1, 12):
-        if i != department_size:
+        if (i != department_size):
             df["Size of IT department"][0] = i
 
             for j in range(1, estimated_duration + 60):
                     df["Estimated duration"][0] = estimated_duration + j
                     trial = model2.predict(df)
-                    if trial[0] > suggest_gains:
-                        (suggest_size, suggest_duration, suggest_gains) = (i, estimated_duration + j, trial[0])
+                    print(trial[0])
+                    if (trial[0] > suggest_gains):
+                        suggest_size, suggest_duration, suggest_gains = i, estimated_duration + j, trial[0]
 
 
-    return jsonify({ 'project_gain' : res, 'suggest_size' : int(suggest_size), 'suggest_duration' : int(suggest_duration), 'suggest_gains' : suggest_gains })
+    return jsonify({ 'predicted_gain' : res, 'suggested_size' : int(suggest_size), 'suggested_duration' : int(suggest_duration), 'potential_gains' : suggest_gains })
 
 
-@app.route('/api/predictEffort', methods=['GET', 'POST'])
+@app.route('/api/predictEffort', methods=['POST'])
 def predictEffort():
-    # json_dict = request.get_json()
+    json_dict = request.get_json()
 
     df = pd.DataFrame(columns=model3_attributes)
     df.loc[0] = [0] * len(model3_attributes)
 
-    df["TeamExp"][0] = 20
-    df["ManagerExp"][0] = 4
-    df["Length"][0] = 12
-
-
-    """
     for attr, val in json_dict.items():
         df[attr][0] = val
-    """
 
     prediction = model3.predict(df)
     res = prediction[0]
