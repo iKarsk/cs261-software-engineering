@@ -30,7 +30,7 @@ y = df['Effort']
 
 
 # Split the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
 models = [
     ('Linear Regression', LinearRegression()),
@@ -82,11 +82,8 @@ for name, model in models:
     print()
 
 
-# Train linear regression model
 model = SVR(kernel='rbf')
 model.fit(X, y)
-
-y_pred = model.predict(X_test)
 
 
 # Save the model to disk

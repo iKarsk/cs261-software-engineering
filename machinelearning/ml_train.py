@@ -1,7 +1,11 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import StandardScaler
 import pickle
@@ -61,28 +65,42 @@ df = df.drop('category_list', axis=1)
 print(df)
 
 # Split the data into features and labels
-X = df.drop(['funding_total_usd'], axis=1)
+X = df.drop(['status'], axis=1)
 y = df['status']
 
-model = SVC(probability=True)
-
+"""
 # Train and evaluate multiple classification models
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6, random_state=42)
 
+# Create a list of classification models to compare
+models = [LogisticRegression(random_state=42),
+          DecisionTreeClassifier(random_state=42),
+          KNeighborsClassifier(),
+          GaussianNB(),
+          SVC(random_state=42),
+          SVC(kernel='linear', random_state=42),
+          RandomForestClassifier(random_state=42)]
 
-# Train the model on the training set
-start_time = time.time()
-model.fit(X_train, y_train)
-end_time = time.time()
+# Fit each model on the training set and evaluate its performance on the testing set
+for model in models:
+    start_time = time.time()
 
-# Make predictions on the testing set
-y_pred = model.predict(X_test)
+    # Train the model on the training set
+    model.fit(X_train, y_train)
 
-# Calculate the accuracy score
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Accuracy:", accuracy)
-print("Training time on test set:", end_time - start_time, "seconds")
+    # Make predictions on the testing set
+    y_pred = model.predict(X_test)
+    end_time = time.time()
 
+    # Calculate the accuracy score
+    acc = accuracy_score(y_test, y_pred)
+    print(type(model).__name__, "accuracy:", acc)
+    print("Training time on test set:", end_time - start_time, "seconds")
+"""
+
+
+
+model = SVC(probability=True)
 
 # Train a SVC model on the data
 start_time = time.time()

@@ -39,4 +39,5 @@
 /frontend/cs261-project-tracker/next-env.d.ts
 
 /machinelearning/env/
+/machinelearning/__pycache__
 frontend/cs261-project-tracker/.env

@@ -1,7 +1,7 @@
 import pickle
 import pandas as pd
 import numpy as np
-from flask import Flask, request, jsonify
+from flask import Flask, request, abort, jsonify
 import json
 
 
@@ -17,7 +17,7 @@ with open('models/model2.pkl', 'rb') as f:
 with open('models/model3.pkl', 'rb') as f:
     model3 = pickle.load(f)
 
-unique_categories = []
+unique_categories = ['funding_total_usd']
 model2_attributes = []
 model3_attributes = []
 
@@ -33,7 +33,7 @@ with open("models/model3attr.txt", "r") as f:
   for line in f:
     model3_attributes.append(line.strip())
 
-# Make a prediction for how much funding is needed for successful project given project categories
+# Make a prediction for if funding is enough for a successful project
 @app.route('/api/predictFunding', methods=['POST'])
 def predictFunding():
 
@@ -43,15 +43,15 @@ def predictFunding():
     category_df.loc[0] = [0] * len(unique_categories)
 
 
-    for category, val in json_dict.items():
-        if category in unique_categories:
-            category_df[category] = val
+    for col, val in json_dict.items():
+        if (col == "funding_total_usd") or (col in unique_categories):
+            category_df[col] = val
 
 
     prediction = model.predict(category_df)
     res = prediction[0]
 
-    return jsonify({ 'enough_funding' : res })
+    return jsonify({ 'enough_funding' : int(res) })
 
 
 # Make a prediction for project financial gain (or loss)
@@ -104,10 +104,8 @@ def predictGain():
             for j in range(1, estimated_duration + 60):
                     df["Estimated duration"][0] = estimated_duration + j
                     trial = model2.predict(df)
-                    print(trial[0])
                     if (trial[0] > suggest_gains):
                         suggest_size, suggest_duration, suggest_gains = i, estimated_duration + j, trial[0]
-
 
     return jsonify({ 'predicted_gain' : res, 'suggested_size' : int(suggest_size), 'suggested_duration' : int(suggest_duration), 'potential_gains' : suggest_gains })
 
@@ -122,6 +120,7 @@ def predictEffort():
     for attr, val in json_dict.items():
         df[attr][0] = val
 
+    print(df)
     prediction = model3.predict(df)
     res = prediction[0]
 
@@ -129,4 +128,4 @@ def predictEffort():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3001)
+    app.run(debug=True, host='0.0.0.0', port=3001)

@@ -141,8 +141,9 @@ export default function Page({
     const [username, setUsername] = useState("");
     const [repo, setRepo] = useState("");
 
-    const [predictFunds, setPredictFunds] = useState({ funding_required : 0 });
-    const [gain, setGain] = useState({ project_gain : 0, suggest_size : 0, suggest_duration : 0, suggest_gains : 0 });
+    const [managerExp, setManagerExp] = useState(0);
+    const [predictFunds, setPredictFunds] = useState({ enough_funding : 0 });
+    const [gain, setGain] = useState({ predicted_gain : 0, suggested_size : 0, suggested_duration : 0, potential_gains : 0 });
     const [effort, setEffort] = useState({ effort_required : 0 });
 
     const [switchToggle, setSwitchToggle] = useState(false);
@@ -256,6 +257,7 @@ export default function Page({
 		    const devRes = await fetch(endpointDev, optionsDev);
 
                     if(response.status === 200 && taskRes.status === 200 && devRes.status === 200){
+			    console.log(json);
                         setProjectName(json.name);
                         setDeadline(json.deadline);
                         setBudget(json.budget);
@@ -298,12 +300,14 @@ export default function Page({
 
     useEffect(() => {
 	    async function fetchData() { 
-		    // Get funding requirement prediction
+		    // Predict whether budget is enough
                     const endpoint = "http://localhost:3001/api/predictFunding";
 		    let data = project.categories.reduce((acc, item) => {
 			    acc[item] = 1;
 			    return acc;
 		    }, {} as {[key: string]: number});
+
+		    data["funding_total_usd"] = project.budget;
 
                     const options = {
                         method: 'POST',
@@ -320,13 +324,15 @@ export default function Page({
 		    const date1:Date = new Date(project.start_date);
 		    const date2:Date = new Date(project.deadline);
 
-		    const diffInMs: number = Math.abs(date2.getTime() - date1.getTime());
+		    const diffInMs = Number(Math.floor(Math.abs(date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24 * 30)));
+		    console.log(diffInMs);
+		    console.log(team.length);
                     const optionsGain = {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-			    body: JSON.stringify({ size_of_it_department : team.length, estimated_duration : diffInMs, categories : project.categories  }),
+			    body: JSON.stringify({ "Size of IT department" : team.length, "Estimated duration" : diffInMs, "Application Domain" : project.categories  }),
                     };
 
                     const responseGain = await fetch(endpointGain, optionsGain);
@@ -335,14 +341,21 @@ export default function Page({
                     const endpointEffort = "http://localhost:3001/api/predictEffort";
 		    
 
-		    const tExp = team.reduce((acc, us) => acc + us.years_experience, 0);
+		    const tExp: number = team.reduce((acc, us) => acc + us.years_experience, 0);
+		    const mExp: number = team.reduce((acc, us) => {
+			    if (us.ismanager) {
+				    return acc + us.age;
+			    } else {
+				    return acc;
+			    }
+		    }, 0);
 
                     const optionsEffort = {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-			    body: JSON.stringify({ TeamExp : tExp, ManagerExp : 5, Length : diffInMs }),
+			    body: JSON.stringify({ "TeamExp" : tExp, "ManagerExp" : mExp, "Length" : diffInMs }),
                     };
 
                     const responseEffort = await fetch(endpointEffort, optionsEffort);
@@ -350,7 +363,6 @@ export default function Page({
 		if (response.status === 200 && responseGain.status === 200 && responseEffort.status === 200) {
 	    		const fundJson = await response.json();
 	   		setPredictFunds(fundJson);
-			console.log(fundJson);
 
 			const gainJson = await responseGain.json();
 			setGain(gainJson);
@@ -749,10 +761,10 @@ export default function Page({
 
         <Tabs variant='enclosed' width="100vw" zIndex={3}>
             <TabList zIndex={3}>
-                <Tab bg="white" zIndex={3}>Overview</Tab>
-                <Tab bg="white" zIndex={3}>Team</Tab>
-                <Tab bg="white" zIndex={3}>Tasks</Tab>
-                {project.isManager && <Tab>Manage</Tab>}
+                <Tab key="overview"bg="white" zIndex={3}>Overview</Tab>
+                <Tab key="team" bg="white" zIndex={3}>Team</Tab>
+                <Tab key="tasks" bg="white" zIndex={3}>Tasks</Tab>
+                {project.isManager && <Tab key="manage">Manage</Tab>}
             </TabList>
 
             <TabPanels zIndex={3}>
@@ -843,17 +855,40 @@ export default function Page({
                             {allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3 && <ErrorMessage message="Team morale is consistently low. Consistently low morale will lead to dramatically reduced productivity." />}
                             {allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3 && <WarningMessage message="Team morale is low, but improving. Keep an eye on the team." />}
                             {allMorales.AvgDayMorale < 3 && allMorales.AvgWeekMorale >= 3 && <WarningMessage message="Your team's morale is low. This may affect the project's progress." />}
-                            Something something risk we need the ML for this. {predictFunds.funding_required} {gain.project_gain} {effort.effort_required}
                         </Text>
+			<StatGroup>
+				<Stat>
+					<StatLabel>Predicted Project Gain</StatLabel>
+					<StatNumber>{gain.predicted_gain.toFixed(2)}%</StatNumber>
+				</Stat>
+				<Stat>
+					<StatLabel>Predicted Effort Required</StatLabel>
+					<StatNumber>{effort.effort_required.toFixed(0)} hours</StatNumber>
+				</Stat>
+			    	<Stat>
+			    		<StatLabel>Sufficient Budget</StatLabel>
+			    		<StatNumber>{ predictFunds.enough_funding == 1 ? "Yes" : "No"}</StatNumber>
+			    	</Stat>
+			</StatGroup>
                     </Box>
                     }
                     <Box>
                         <Heading size='xs' textTransform='uppercase'>
                             Suggestions
                         </Heading>
-                        <Text pt='2' fontSize='sm'>
-                            Some suggestions!
-                        </Text>
+			<StatGroup>
+	    			{ gain.predicted_gain != gain.potential_gains &&
+				<Stat>
+					<StatLabel>Potential Project Gain</StatLabel>
+					<StatNumber>{gain.potential_gains.toFixed(2)}%</StatNumber>
+					<StatHelpText></StatHelpText>
+				</Stat>
+				}
+				<Stat>
+					<StatLabel>Predicted Effort Required</StatLabel>
+					<StatNumber>{effort.effort_required.toFixed(0)} hours</StatNumber>
+				</Stat>
+			</StatGroup>
                     </Box>
                 </Stack>
             </CardBody>

@@ -52,8 +52,6 @@ df = pd.concat([df, dummies], axis=1)
 df.drop(['Application Domain'], axis=1, inplace=True)
 
 
-df = df.drop(index=df[df['\% project gain (loss) (Main)'] == '0'].index)
-
 domain_dict = { '1' : "Banking systems", '2' : "ERP", '3' : "Mobile applications", '5' : "Financial and managerial", '6' : "Web applications", '7' : "Bespoke applications" }
 
 # rename columns using the dictionary
@@ -68,7 +66,7 @@ y = df['\% project gain (loss) (Main)']
 
 
 # Split the dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.9)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
 models = [
     ('Linear Regression', LinearRegression()),
