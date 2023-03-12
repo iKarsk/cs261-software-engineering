@@ -298,6 +298,20 @@ export default function Page({
                         const moraleJson = await moraleResponse.json();
 
                         setAllMorales(moraleJson);
+
+                        let moraleRisk = 0
+
+                        if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale < 3){
+                            moraleRisk += 50;
+                        }else if(moraleJson.AvgWeekMorale < 3 && moraleJson.AvgDayMorale >= 3){
+                            moraleRisk += 25;
+                        } else if(moraleJson.AvgWeekMorale >= 3 && moraleJson.AvgDayMorale < 3){
+                            moraleRisk += 10;
+                        }
+
+                        setRiskVal(riskVal + moraleRisk);
+
+
                         if(json.status === 0){
                             setNeedMorale(Number(json.morale) === -1 ? true : false);
                         }
@@ -388,47 +402,38 @@ export default function Page({
 
 			const effortJson = await responseEffort.json();
 			setEffort(effortJson);
+
+
+            let deadlineRisk = 0
+            const suggestedDuration = gainJson.suggested_duration * 30;
+            const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
+    
+            if(suggestedDuration > daysLeft * 1.5){
+                deadlineRisk += 50;
+            }
+            else if(suggestedDuration >= 1.25 * daysLeft){
+                deadlineRisk += 25;
+            } else if(suggestedDuration >= 1.1 * daysLeft){
+                deadlineRisk += 10;
+            }
+    
+            let teamRisk = 0;
+    
+            if (team.length < gainJson.min_size){
+                teamRisk += 30;
+            };
+
+            setRiskVal(riskVal + deadlineRisk + teamRisk);
 		}
     	    }
 
 	    fetchData().catch(console.error);
 
 
+
+
     }, [budget, deadline, categories]);
 
-    useEffect(() => {
-        let moraleRisk = 0
-
-        if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale < 3){
-            moraleRisk += 50;
-        }else if(allMorales.AvgWeekMorale < 3 && allMorales.AvgDayMorale >= 3){
-            moraleRisk += 25;
-        } else if(allMorales.AvgWeekMorale >= 3 && allMorales.AvgDayMorale < 3){
-            moraleRisk += 10;
-        }
-
-        let deadlineRisk = 0
-        const suggestedDuration = gain.suggested_duration * 30;
-        const daysLeft = Math.floor((new Date(project.deadline).valueOf() - new Date().valueOf()) / (1000 * 3600 * 24));
-
-        if(suggestedDuration > daysLeft * 1.5){
-            deadlineRisk += 50;
-        }
-        else if(suggestedDuration >= 1.25 * daysLeft){
-            deadlineRisk += 25;
-        } else if(suggestedDuration >= 1.1 * daysLeft){
-            deadlineRisk += 10;
-        }
-
-        let teamRisk = 0;
-
-        if (team.length < gain.min_size){
-            teamRisk += 30;
-        };
-
-        const totalRisk = moraleRisk + deadlineRisk + teamRisk;
-        setRiskVal(totalRisk);
-    }, [])
 
     const queryUsername = async (username: string) => {
         return Promise.resolve(fetch(`https://api.github.com/users/${username}/repos`));
