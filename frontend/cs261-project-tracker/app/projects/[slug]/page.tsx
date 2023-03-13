@@ -981,7 +981,7 @@ export default function Page({
 				</Stat>
 				<Stat>
 					<StatLabel>Suggested Project Length</StatLabel>
-					<StatNumber>{gain.suggested_duration.toFixed(0)} months</StatNumber>
+					{ gain.suggested_duration.toFixed(0) == '0' ? <StatNumber>&lt;1 months</StatNumber> : <StatNumber>{gain.suggested_duration.toFixed(0)} months</StatNumber>}
 				</Stat>
 			</StatGroup>
                     </Box>

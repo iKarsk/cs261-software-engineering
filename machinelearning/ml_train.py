@@ -34,7 +34,6 @@ df['status'] = df['status'].apply(lambda x: 0 if x == 'closed' else 1)
 # Remove permalink column
 df = df.drop('permalink', axis=1)
 
-"""
 # Extract unique categories and append each category as a column to the DataFrame
 unique_categories = set(cat for cat_list in df['category_list'].str.split('|') for cat in cat_list)
 cat1 = set([category for row in df['category_list'] for category in row.split('|')])
@@ -56,7 +55,6 @@ category_counts = Counter(categories)
 # Print categories in descending order of their counts
 for category, count in category_counts.most_common():
     print(f"{category}: {count}")
-"""
 
 # Remove the category_list column
 df = df.drop('category_list', axis=1)
@@ -71,6 +69,8 @@ y = df['status']
 # Train and evaluate multiple classification models
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6, random_state=42)
 
+
+"""
 # Create a list of classification models to compare
 models = [LogisticRegression(random_state=42),
           DecisionTreeClassifier(random_state=42),
@@ -107,7 +107,6 @@ print("Training time on entire dataset:", end_time - start_time, "seconds")
 with open('models/model.pkl', 'wb') as f:
     pickle.dump(model, f)
 
-"""
 with open("models/categories.txt", "w") as f:
     for c in list(unique_categories):
         f.write(str(c) +"\n")
